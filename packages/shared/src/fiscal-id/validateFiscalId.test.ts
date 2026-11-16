@@ -43,6 +43,14 @@ describe('validateFiscalId · Spain (spec 02 §5)', () => {
     expect(result).toMatchObject({ reason });
   });
 
+  it.each([
+    ['A28015865', 'Telefónica'],
+    ['A46103834', 'Mercadona'],
+    ['A15075062', 'Inditex'],
+  ])('accepts the real public CIF %s (%s)', (cif) => {
+    expect(validateFiscalId(cif, 'ES')).toEqual({ valid: true, normalized: cif, type: 'CIF' });
+  });
+
   it('returns the normalized value even when invalid (useful for error messages)', () => {
     expect(validateFiscalId('12.345.678-a', 'ES')).toMatchObject({ valid: false, normalized: '12345678A' });
   });

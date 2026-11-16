@@ -46,6 +46,15 @@ describe('computeTieredCost', () => {
     expect(() => computeTieredCost(5, [{ upTo: 3, unitPriceCents: 100 }])).toThrow();
   });
 
+  it('throws on a misordered tier table instead of producing negative lines', () => {
+    const misordered = [
+      { upTo: 10, unitPriceCents: 1000 },
+      { upTo: 5, unitPriceCents: 800 },
+      { upTo: null, unitPriceCents: 500 },
+    ];
+    expect(() => computeTieredCost(20, misordered)).toThrow(/strictly increasing/);
+  });
+
   describe('invariants (1…300 users)', () => {
     const range = Array.from({ length: 300 }, (_, i) => i + 1);
 
