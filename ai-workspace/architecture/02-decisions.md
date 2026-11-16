@@ -47,6 +47,16 @@ Front (UX inmediata) → Zod en la API (autoridad) → `CHECK`/`UNIQUE` en SQLit
 - **Fuera de CI a propósito**: la API real de tipos de cambio (sería frágil; se simula) y la revisión visual. CD descartado: la prueba se evalúa en local y una API con SQLite necesita un host con disco persistente.
 - **`overrides` de `minimatch`**: `typescript-eslint@8.72.2` (la última) arrastra `minimatch@10`, con un ReDoS moderado sin parche en la rama 10.x. Se fuerza `^11.0.8` solo dentro de `typescript-estree` y se verifica que ESLint funciona. **Revisar y quitar** cuando `typescript-eslint` actualice la dependencia.
 
+## ADR-012 · Despliegue con Docker Compose (en lugar de instaladores por sistema operativo)
+- **Contexto**: se planteó crear instaladores para Windows y Linux que instalaran "todo lo necesario".
+- **Descartado**: instaladores que instalan Node en el sistema. Requieren permisos de administrador, son distintos en cada distribución, pueden chocar con nvm o Volta, un evaluador técnico desconfía (con razón) de scripts que modifican su máquina y serían dos artefactos que mantener y probar.
+- **Decisión**: dos vías documentadas. **Node** (`npm install && npm run dev`, la principal para desarrollar) y **Docker Compose** (`docker compose up --build`, sin Node en el host).
+  - Imagen de la API: Node 26 slim, usuario sin privilegios, healthcheck, `npm ci -w @saas/api` (sin React ni Vite), seed idempotente al arrancar.
+  - Imagen web: build de Vite servido por **nginx**, que hace de proxy de `/api` (mismo contrato que el proxy de Vite, ADR-006): un solo origen y sin CORS.
+  - SQLite en un **volumen con nombre**. Capas de dependencias cacheadas (manifiestos antes que código).
+- **Verificación**: job `docker` en la CI que construye, arranca con `--wait` (healthchecks) y ejecuta `scripts/docker-smoke.sh` (web, enlaces directos, proxy, búsqueda, DNI, precio, **persistencia tras reiniciar**). El mismo script sirve en local.
+- **Complemento**: `engine-strict=true` en `.npmrc`. Con un Node antiguo, `npm install` se detiene al principio con un mensaje claro en lugar de fallar de forma confusa más tarde.
+
 ## ADR-008 · Runtime Node ≥ 22 (desarrollado sobre Node 26 LTS)
 - **Contexto**: Fastify 5 actual → `light-my-request@6.8` → `cookie@2`, que exige Node ≥ 22. Además, Node 20 está fuera de soporte desde abril de 2026.
 - **Decisión**: `engines.node >= 22` y `.nvmrc`. Desarrollo y tests sobre Node 26 (LTS activa).

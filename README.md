@@ -23,6 +23,23 @@ Abre **http://localhost:5173**. Eso es todo.
 
 `npm run dev` crea la base de datos SQLite (aplica las migraciones), carga **datos de ejemplo la primera vez** (6 clientes con simulaciones) y arranca juntos la API (`:3000`) y el frontend (`:5173`). `Ctrl+C` para los dos.
 
+### Alternativa: con Docker (sin instalar Node)
+
+```bash
+git clone https://github.com/DavidPriSan/SaaS-O-Matic.git
+cd SaaS-O-Matic
+docker compose up --build
+```
+
+Abre **http://localhost:8080**. Es el build de producción: nginx sirve el frontend y hace de proxy de `/api` hacia la API. La base de datos vive en un volumen de Docker, así que los datos se conservan entre reinicios.
+
+| Comando | Efecto |
+|---------|--------|
+| `docker compose up -d --build --wait` | Arranca en segundo plano y espera a que los healthchecks estén en verde |
+| `bash scripts/docker-smoke.sh` | Prueba de humo: web, proxy, búsqueda, validación de DNI, precio, persistencia (la misma que la CI) |
+| `docker compose down` | Para los contenedores (conserva los datos) |
+| `docker compose down -v` | Para los contenedores y **borra** la base de datos |
+
 ## Recorrido sugerido (5 minutos)
 
 1. **Buscador**: escribe `nebula` (sin tilde ni mayúsculas) → encuentra *Nébula Analytics*. Prueba también con un NIF parcial: `x-123`.
@@ -102,7 +119,7 @@ Más en [arquitectura](ai-workspace/architecture/01-structure.md) y en el [regis
 
 - **212 tests**: dominio (ejemplos de la spec, vectores de NIF y CIF reales, invariantes), integración de la API sobre SQLite en memoria y flujos de UI con Testing Library.
 - **Cobertura mínima** obligatoria: `shared` 95 %, API 90 %.
-- **CI en cada push y PR** (GitHub Actions): formato, ESLint con reglas que usan los tipos, typecheck, `npm audit` y tests + build en Ubuntu (Node 22 y 26) y Windows.
+- **CI en cada push y PR** (GitHub Actions): formato, ESLint con reglas que usan los tipos, typecheck, `npm audit`, tests + build en Ubuntu (Node 22 y 26) y Windows, y **despliegue Docker Compose** construido, arrancado y verificado con una prueba de humo.
 
 ## Solución de problemas
 
@@ -110,7 +127,7 @@ Más en [arquitectura](ai-workspace/architecture/01-structure.md) y en el [regis
 |----------|----------|
 | `Port(s) already in use: 3000 …` | Otro proceso (ajeno a este proyecto) usa el puerto. Localízalo y ciérralo: en Windows con `netstat -ano \| findstr :3000` y `taskkill /PID <pid> /F`; en macOS o Linux con `lsof -i :3000` y `kill <pid>`. Después repite `npm run dev` |
 | Error de `better-sqlite3` al arrancar (*bindings*) | Módulo nativo compilado para otra versión de Node: `npm rebuild better-sqlite3`. Con npm 11, sus scripts de instalación ya están aprobados en `package.json` (`allowScripts`) |
-| `npm warn EBADENGINE` o errores raros de sintaxis | Comprueba `node -v` ≥ 22 (hay `.nvmrc` para `nvm use`) |
+| `npm error engine Unsupported engine` al instalar | Tu Node es anterior a la 22 (`node -v`). Actualízalo (hay `.nvmrc` para `nvm use`) o usa la vía Docker |
 | Quiero empezar con la base de datos vacía o recargar los ejemplos | Borra `apps/api/data/` y vuelve a ejecutar `npm run dev` |
 | No cargan los tipos de cambio | La app sigue funcionando en EUR y muestra un aviso con "Reintentar". Si hay tipos de una visita anterior, se usan indicando su fecha |
 | `⚠ Not responding after 20s: api` | La API falló al arrancar (p. ej. `Invalid environment configuration → at LOG_LEVEL`): el motivo está en las líneas `[api]`. En modo watch se reinicia sola al guardar el arreglo |
