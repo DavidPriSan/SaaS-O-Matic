@@ -1,4 +1,4 @@
-import type { Customer } from '@saas/shared';
+import { computeQuote, type Customer, type Simulation } from '@saas/shared';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -65,3 +65,31 @@ export const aCustomer = (overrides: Partial<Customer> = {}): Customer => ({
   createdAt: '2026-11-16T09:00:00.000Z',
   ...overrides,
 });
+
+interface SimulationFixture {
+  id?: number;
+  activeUsers?: number;
+  storageGb?: number;
+  apiCalls?: number;
+}
+
+/** A realistic persisted simulation for the default customer (quote computed with the real pricing). */
+export function aSimulation({
+  id = 1,
+  activeUsers = 10,
+  storageGb = 0,
+  apiCalls = 0,
+}: SimulationFixture = {}): Simulation {
+  const { id: customerId, plan, countryCode } = aCustomer();
+  return {
+    id,
+    customerId,
+    activeUsers,
+    storageGb,
+    apiCalls,
+    plan,
+    countryCode,
+    quote: computeQuote({ activeUsers, storageGb, apiCalls, plan, countryCode }),
+    createdAt: '2026-11-16T10:00:00.000Z',
+  };
+}

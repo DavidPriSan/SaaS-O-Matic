@@ -4,7 +4,11 @@ import { aCustomer, errorBody, mockFetch, renderRoute } from '../../test/utils';
 
 describe('CustomerDetailPage', () => {
   it('shows the customer data card', async () => {
-    mockFetch(() => ({ body: aCustomer({ plan: 'enterprise', countryCode: 'DE' }) }));
+    mockFetch(({ url }) =>
+      url.endsWith('/simulations')
+        ? { body: { items: [] } }
+        : { body: aCustomer({ plan: 'enterprise', countryCode: 'DE' }) },
+    );
     renderRoute('/customers/1');
 
     expect(await screen.findByRole('heading', { name: 'Acme Ibérica S.L.' })).toBeInTheDocument();

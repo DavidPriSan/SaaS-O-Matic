@@ -36,6 +36,11 @@ Cabecera global: logo y **selector de divisa**, presente en todas las vistas.
 ## 4. Historial
 Lista o tabla de simulaciones (fecha, usuarios, GB, llamadas, total), convertida a la divisa activa. Estado vacío con llamada a la acción.
 
+**Ampliaciones añadidas en la fase 4** (no estaban en la spec original):
+- Botón **"Cargar"** en cada simulación guardada: devuelve sus valores al simulador para retomar y ajustar una propuesta. Por eso el estado del simulador vive en la página de detalle y no en el componente.
+- Precio medio por usuario (base / usuarios) bajo la proyección, como ayuda comercial.
+- El slider de almacenamiento y el de llamadas escalan con el plan (hasta 4 veces lo incluido). Los valores mayores se teclean.
+
 ## 5. Estados transversales
 Cada consulta al backend tiene sus 3 estados (skeleton, error con reintentar y vacío). 404 de cliente → vista "Cliente no encontrado".
 

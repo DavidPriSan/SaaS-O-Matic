@@ -1,3 +1,4 @@
+import type { Customer } from '@saas/shared';
 import { useParams } from 'react-router';
 import { describeError } from '../../api/errors';
 import { ApiError } from '../../api/http';
@@ -6,6 +7,10 @@ import { PageHeader } from '../../components/PageHeader';
 import { EmptyState, ErrorState, SkeletonGrid } from '../../components/StatusViews';
 import { TAX_ID_TYPE_LABELS } from './labels';
 import { CustomerInfoCard } from './CustomerInfoCard';
+import { useSimulatorInputs } from '../simulator/hooks';
+import { SimulationHistory } from '../simulator/SimulationHistory';
+import { Simulator } from '../simulator/Simulator';
+import styles from './CustomerDetailPage.module.css';
 import { useCustomer } from './hooks';
 
 const BACK = { to: '/', label: 'Volver a clientes' };
@@ -33,15 +38,27 @@ function CustomerDetail({ id }: { id: number }) {
     );
   }
 
-  const { data } = customer;
+  return <CustomerWorkspace customer={customer.data} />;
+}
+
+function CustomerWorkspace({ customer }: { customer: Customer }) {
+  // Lifted here so the history can load a saved simulation back into the simulator.
+  const { inputs, setInput, setInputs } = useSimulatorInputs();
+
   return (
     <>
       <PageHeader
-        title={data.companyName}
-        subtitle={`${TAX_ID_TYPE_LABELS[data.taxIdType]} ${data.taxId}`}
+        title={customer.companyName}
+        subtitle={`${TAX_ID_TYPE_LABELS[customer.taxIdType]} ${customer.taxId}`}
         backTo={BACK}
       />
-      <CustomerInfoCard customer={data} />
+      <div className={styles.stack}>
+        <CustomerInfoCard customer={customer} />
+        <div className={styles.workspace}>
+          <Simulator customer={customer} inputs={inputs} onInputChange={setInput} />
+          <SimulationHistory customerId={customer.id} onLoad={setInputs} />
+        </div>
+      </div>
     </>
   );
 }
