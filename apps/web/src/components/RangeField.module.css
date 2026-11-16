@@ -45,6 +45,8 @@
 
 .slider {
   width: 100%;
+  /* Browsers give range inputs a default margin: with width 100% it would cross the card padding. */
+  margin: 0;
   accent-color: var(--color-primary);
   cursor: pointer;
 }

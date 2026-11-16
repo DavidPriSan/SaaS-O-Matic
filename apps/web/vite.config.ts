@@ -1,7 +1,9 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
+import { z } from 'zod';
 
-const API_TARGET = 'http://localhost:3000';
+// Env is external input (CLAUDE.md). The E2E run points the proxy at its own API instance.
+const API_TARGET = z.url().default('http://localhost:3000').parse(process.env.API_TARGET);
 
 export default defineConfig({
   plugins: [react()],
@@ -16,6 +18,7 @@ export default defineConfig({
       },
     },
   },
+  // `vite preview` (production build, used by E2E) inherits server.proxy; strictPort is set per command.
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],

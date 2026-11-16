@@ -5,3 +5,6 @@ package-lock.json
 apps/api/data
 # Documentation is hand-formatted (Spanish prose and wide tables)
 *.md
+e2e/.tmp
+e2e/test-results
+e2e/playwright-report

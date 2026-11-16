@@ -47,3 +47,20 @@
   font-size: 1.1rem;
   font-weight: 700;
 }
+
+/* Long amounts (large usage in MXN/JPY) on a narrow phone: amounts are unbreakable (Intl joins number and
+   currency with a non-breaking space), so the labels give way instead: smaller type and hyphenation. */
+@media (max-width: 400px) {
+  .table {
+    font-size: 0.9rem;
+  }
+
+  .table th {
+    hyphens: auto;
+  }
+
+  .total th,
+  .total td {
+    font-size: 1rem;
+  }
+}

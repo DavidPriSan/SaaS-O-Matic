@@ -28,6 +28,8 @@
   --space-5: 24px;
   --space-6: 32px;
   --space-7: 48px;
+  /* 16px on a 320px phone, growing to 24px from 480px: narrow screens keep room for long amounts. */
+  --card-padding: clamp(var(--space-4), 5vw, var(--space-5));
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, monospace;
