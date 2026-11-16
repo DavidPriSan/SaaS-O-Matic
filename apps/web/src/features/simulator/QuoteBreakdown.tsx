@@ -14,6 +14,13 @@ export function QuoteBreakdown({ quote, plan }: { quote: Quote; plan: PlanInfo }
     <table className={styles.table}>
       <caption className="visually-hidden">Desglose de la factura mensual</caption>
       <tbody>
+        <tr className={styles.group}>
+          <th scope="rowgroup">
+            Coste por usuarios
+            <span className={styles.detail}>Tramos del enunciado</span>
+          </th>
+          <td>{money(quote.baseCents)}</td>
+        </tr>
         {quote.tiers.map((tier, index) => (
           <tr key={tier.from} className={index === activeTier ? styles.active : undefined}>
             <th scope="row">
@@ -25,27 +32,8 @@ export function QuoteBreakdown({ quote, plan }: { quote: Quote; plan: PlanInfo }
             <td>{money(tier.amountCents)}</td>
           </tr>
         ))}
-        <tr>
-          <th scope="row">
-            Almacenamiento extra
-            <span className={styles.detail}>
-              {formatNumber(quote.storageOverageGb)} GB × {money(OVERAGE.storageCentsPerGb)} · incluidos{' '}
-              {formatNumber(plan.includedStorageGb)} GB
-            </span>
-          </th>
-          <td>{money(quote.storageOverageCents)}</td>
-        </tr>
-        <tr>
-          <th scope="row">
-            Llamadas API extra
-            <span className={styles.detail}>
-              {formatNumber(quote.apiOverageBlocks)} bloques de {formatNumber(OVERAGE.apiCallsBlockSize)} ×{' '}
-              {money(OVERAGE.apiCentsPerBlock)} · incluidas {formatNumber(plan.includedApiCalls)}
-            </span>
-          </th>
-          <td>{money(quote.apiOverageCents)}</td>
-        </tr>
       </tbody>
+      <ExtrasRows quote={quote} plan={plan} />
       <tfoot>
         <tr>
           <th scope="row">Subtotal</th>
@@ -61,5 +49,46 @@ export function QuoteBreakdown({ quote, plan }: { quote: Quote; plan: PlanInfo }
         </tr>
       </tfoot>
     </table>
+  );
+}
+
+/** The statement only prices users: storage and API overage are an own assumption (spec 01 §3) and say so. */
+function ExtrasRows({ quote, plan }: { quote: Quote; plan: PlanInfo }) {
+  const money = useMoneyFormatter();
+
+  return (
+    <tbody>
+      <tr className={styles.group}>
+        <th scope="rowgroup">
+          Extras por consumo
+          <span className={styles.detail}>
+            {/* Inline (not a nowrap badge) so it can wrap on a 320 px phone next to a long amount. */}
+            <mark className={styles.assumption}>Supuesto propio</mark> El enunciado solo fija el precio por usuario;
+            tarifa de excedentes propuesta.
+          </span>
+        </th>
+        <td>{money(quote.storageOverageCents + quote.apiOverageCents)}</td>
+      </tr>
+      <tr>
+        <th scope="row">
+          Almacenamiento extra
+          <span className={styles.detail}>
+            {formatNumber(quote.storageOverageGb)} GB × {money(OVERAGE.storageCentsPerGb)} · incluidos{' '}
+            {formatNumber(plan.includedStorageGb)} GB
+          </span>
+        </th>
+        <td>{money(quote.storageOverageCents)}</td>
+      </tr>
+      <tr>
+        <th scope="row">
+          Llamadas API extra
+          <span className={styles.detail}>
+            {formatNumber(quote.apiOverageBlocks)} bloques de {formatNumber(OVERAGE.apiCallsBlockSize)} ×{' '}
+            {money(OVERAGE.apiCentsPerBlock)} · incluidas {formatNumber(plan.includedApiCalls)}
+          </span>
+        </th>
+        <td>{money(quote.apiOverageCents)}</td>
+      </tr>
+    </tbody>
   );
 }

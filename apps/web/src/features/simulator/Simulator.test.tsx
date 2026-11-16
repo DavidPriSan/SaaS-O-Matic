@@ -39,6 +39,23 @@ describe('Simulator', () => {
     expect(requests).toHaveLength(requestsBefore);
   });
 
+  it('separates the statement user cost from the extras, flagged as an own assumption', async () => {
+    mockApi();
+    await openCustomer();
+
+    fireEvent.change(usersSlider(), { target: { value: '15' } });
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Almacenamiento' }), { target: { value: '300' } });
+
+    // The statement only prices users: its cost (140 €) is shown on its own, before any extra.
+    const userCost = screen.getByText('Coste por usuarios').closest('tr');
+    expect(userCost).toHaveTextContent(/Tramos del enunciado/);
+    expect(userCost).toHaveTextContent(/140,00\s€/);
+    // 300 GB − 250 included = 50 GB × 0,20 € = 10 €
+    const extras = screen.getByText('Extras por consumo').closest('tr');
+    expect(extras).toHaveTextContent('Supuesto propio');
+    expect(extras).toHaveTextContent(/10,00\s€/);
+  });
+
   it('accepts exact values beyond the slider range and validates the typed draft', async () => {
     mockApi();
     const { user } = await openCustomer();

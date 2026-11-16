@@ -64,3 +64,29 @@
     font-size: 1rem;
   }
 }
+
+/* Group headers ("Coste por usuarios", "Extras por consumo"): their lines are indented below them. */
+.group th,
+.group td {
+  padding-top: var(--space-3);
+  font-weight: 700;
+}
+
+.group ~ tr th {
+  padding-left: var(--space-3);
+}
+
+@media (max-width: 400px) {
+  .group ~ tr th {
+    padding-left: 0;
+  }
+}
+
+.assumption {
+  padding: 1px var(--space-2);
+  border-radius: 999px;
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-weight: 600;
+  box-decoration-break: clone;
+}

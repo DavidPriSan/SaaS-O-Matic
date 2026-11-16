@@ -38,6 +38,7 @@ Cabecera global: logo y **selector de divisa**, presente en todas las vistas.
 - Controles: **slider de usuarios** (1–500) sincronizado con un input numérico (hasta 100.000), y sliders o inputs para GB y llamadas API.
 - Cálculo **en el cliente** con `computeQuote` de `shared` en cada cambio: sin red y sin lag. Plan y país salen del cliente.
 - Desglose visible: tabla de tramos, excedentes, subtotal, IVA (%) y **total** en la divisa seleccionada. El tramo activo se resalta.
+  - Dos grupos con su importe: **"Coste por usuarios" (tramos del enunciado)** = `baseCents`, y **"Extras por consumo"** marcado con la etiqueta **"Supuesto propio"** y una nota (el enunciado solo fija el precio por usuario). Así queda claro qué parte es el cálculo exigido y qué parte es una ampliación propuesta.
 - Botón "Guardar simulación" → `POST /simulations`. Al terminar se invalida la query del historial. Estado de guardado: *loading*, éxito (toast) o error (mensaje del contrato).
 - El total que devuelve el servidor es el que se guarda. Se muestra un aviso si difiere del calculado en el front (no debería pasar nunca; sirve de alarma).
 
