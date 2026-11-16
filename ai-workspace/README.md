@@ -28,6 +28,8 @@ Las reglas de `CLAUDE.md` no se quedaron en el papel: **ESLint las hace ejecutab
 | [07 · Divisas](vibe-log/07-phase5-currency.md) | API externa, caché, estados | **Mutation testing manual**: un test que faltaba habría permitido mostrar euros con etiqueta de dólares; feedback de usuario sobre la zona horaria |
 | [08 · Cierre](vibe-log/08-phase6-closing.md) | README, `npm run dev`, auditoría | **Auditoría con un agente independiente** (6 bugs reales y 1 falso positivo, todos verificados); prueba desde un clon limpio; **diagnóstico de procesos huérfanos** hasta la causa raíz (job objects de Windows) tras descartar una solución "de libro" que no funcionaba |
 
+| [09 · Docker](vibe-log/09-docker-deployment.md) | Despliegue con Docker Compose | Se descartaron los instaladores de sistema (ADR-012); validado primero en la CI y después en local (7/7 + no-root, cabeceras y límites); tamaño de imagen declarado como pendiente |
+
 ## Retrospectiva: cómo se dirigió a la IA
 
 1. **Spec antes que código, y specs verificadas.** Los números de las specs (precios, vectores de NIF) se comprobaron con un script ajeno a la implementación. Cuando el código destapó un hueco en la spec, primero se corrigió la spec.
