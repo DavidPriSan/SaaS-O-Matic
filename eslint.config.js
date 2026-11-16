@@ -63,9 +63,15 @@ export default defineConfig(
   },
 
   {
-    files: ['**/*.js'],
+    files: ['**/*.{js,mjs}'],
     extends: [js.configs.recommended, tseslint.configs.disableTypeChecked],
     languageOptions: { globals: globals.node },
+  },
+
+  {
+    // Dev orchestrator: its console output is the product.
+    files: ['scripts/**/*.mjs'],
+    rules: { 'no-console': 'off' },
   },
 
   prettier,
