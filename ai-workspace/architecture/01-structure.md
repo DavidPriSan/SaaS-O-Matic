@@ -24,7 +24,10 @@
 SaaS-O-Matic/
 ├─ ai-workspace/                  # proceso de ingeniería (specs, arquitectura, planes, vibe-log)
 ├─ CLAUDE.md                      # reglas que la IA debe seguir en este repo
-├─ package.json                   # npm workspaces + scripts raíz (dev, test, build, seed)
+├─ .github/workflows/ci.yml       # CI: calidad + matriz de tests (ADR-011)
+├─ scripts/dev.mjs                # `npm run dev`: API + web juntos, comprobación de puertos, parada conjunta
+├─ eslint.config.js · .prettierrc.json
+├─ package.json                   # npm workspaces + scripts raíz (dev, check, test, build, seed)
 ├─ tsconfig.base.json             # strict: true, noUncheckedIndexedAccess
 ├─ packages/
 │  └─ shared/                     # @saas/shared: TS puro, sin dependencias de runtime salvo zod

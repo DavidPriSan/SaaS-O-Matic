@@ -100,7 +100,7 @@ Más en [arquitectura](ai-workspace/architecture/01-structure.md) y en el [regis
 
 ## Calidad
 
-- **190 tests**: dominio (ejemplos de la spec, vectores de NIF y CIF reales, invariantes), integración de la API sobre SQLite en memoria y flujos de UI con Testing Library.
+- **212 tests**: dominio (ejemplos de la spec, vectores de NIF y CIF reales, invariantes), integración de la API sobre SQLite en memoria y flujos de UI con Testing Library.
 - **Cobertura mínima** obligatoria: `shared` 95 %, API 90 %.
 - **CI en cada push y PR** (GitHub Actions): formato, ESLint con reglas que usan los tipos, typecheck, `npm audit` y tests + build en Ubuntu (Node 22 y 26) y Windows.
 
@@ -108,7 +108,7 @@ Más en [arquitectura](ai-workspace/architecture/01-structure.md) y en el [regis
 
 | Problema | Solución |
 |----------|----------|
-| `Port(s) already in use: 3000 …` | Otro proceso usa el puerto. Localízalo y ciérralo: en Windows con `netstat -ano \| findstr :3000` y `taskkill /PID <pid> /F`; en macOS o Linux con `lsof -i :3000` y `kill <pid>`. Después repite `npm run dev` |
+| `Port(s) already in use: 3000 …` | Otro proceso usa el puerto. Puede ser una ejecución anterior que se cerró a la fuerza (matando el proceso en lugar de usar `Ctrl+C`), que deja vivos a los hijos. Localízalo y ciérralo: en Windows con `netstat -ano \| findstr :3000` y `taskkill /PID <pid> /F`; en macOS o Linux con `lsof -i :3000` y `kill <pid>`. Después repite `npm run dev` |
 | Error de `better-sqlite3` al arrancar (*bindings*) | Módulo nativo compilado para otra versión de Node: `npm rebuild better-sqlite3`. Con npm 11, sus scripts de instalación ya están aprobados en `package.json` (`allowScripts`) |
 | `npm warn EBADENGINE` o errores raros de sintaxis | Comprueba `node -v` ≥ 22 (hay `.nvmrc` para `nvm use`) |
 | Quiero empezar con la base de datos vacía o recargar los ejemplos | Borra `apps/api/data/` y vuelve a ejecutar `npm run dev` |

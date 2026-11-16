@@ -11,7 +11,7 @@ Ninguna fase empieza sin que la anterior cumpla sus criterios de aceptación.
 | **3. Front: base** | Layout, router, cliente API, dashboard y buscador, alta de cliente | Búsqueda por nombre y NIF contra la API real. Estados de carga, error y vacío ✅ |
 | **4. Front: detalle y simulador** | Cards, simulador, historial | Mover el slider recalcula al instante. Guardar persiste y refresca el historial ✅ |
 | **5. Divisas** | `currency/` | Cambiar de divisa convierte todos los importes. Con la API caída la app sigue en EUR y muestra un banner ✅ |
-| **6. Cierre** | README, revisión final, vibe-log | `npm install && npm run dev` levanta todo. Auditoría final de seguridad y calidad |
+| **6. Cierre** | README, revisión final, vibe-log | `npm install && npm run dev` levanta todo. Auditoría final de seguridad y calidad ✅ |
 
 ## Plantilla de prompt por feature
 

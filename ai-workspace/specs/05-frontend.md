@@ -55,16 +55,19 @@ Cada consulta al backend tiene sus 3 estados (skeleton, error con reintentar y v
 ## 6. Responsive
 Mobile-first. Grid de cards: 1 columna (<640 px), 2 (≥640 px) y 3 (≥1024 px). En el detalle, simulador e historial van apilados en móvil y lado a lado en escritorio. Sin scroll horizontal.
 
-## 7. Organización
+## 7. Organización (estado final)
 ```
 apps/web/src/
-├─ api/            # cliente HTTP tipado (fetch + parseo de errores del contrato) y query keys
+├─ api/            # http.ts (cliente tipado + ApiError), customers, simulations, exchangeRates, queryClient
+├─ app/            # Layout (cabecera con divisa, banner, pie) y tabla de rutas
 ├─ features/
-│  ├─ customers/   # SearchPage, CustomerCard, CustomerForm, CustomerDetailPage, hooks
-│  ├─ simulator/   # Simulator, QuoteBreakdown, SimulationHistory, hooks
-│  └─ currency/    # CurrencyContext, CurrencySelector, useExchangeRates, formatMoney
-├─ components/     # UI genérica: Button, Card, Slider, Spinner, ErrorState, EmptyState
-├─ styles/         # tokens.css, reset
-└─ main.tsx / App.tsx / router.tsx
+│  ├─ customers/   # SearchPage, CustomerCard, NewCustomerPage + CustomerForm/useCustomerForm, CustomerDetailPage
+│  ├─ simulator/   # Simulator, ProjectionSummary, UsageControls, QuoteBreakdown, SimulationHistory, hooks
+│  └─ currency/    # CurrencyContext, CurrencySelector, RatesStatus, useExchangeRates, ratesCache, formatMoney
+├─ components/     # UI genérica: Button, Field, RangeField, Badge, PageHeader, StatusViews
+├─ hooks/          # useDebouncedValue
+├─ lib/            # format (fechas y números es-ES), storage (localStorage seguro)
+├─ styles/         # tokens.css (claro/oscuro), global.css
+└─ main.tsx
 ```
 Regla: los componentes no contienen lógica de negocio. Calculan con `shared` y hablan con la API a través de hooks.
