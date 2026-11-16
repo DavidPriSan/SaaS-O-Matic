@@ -63,7 +63,10 @@ export function SearchPage() {
 function Results({ customers, term }: { customers: Customer[]; term: string }) {
   if (customers.length === 0) {
     return term ? (
-      <EmptyState title={`Sin resultados para «${term}»`} description="Prueba con otro nombre o con el identificador fiscal." />
+      <EmptyState
+        title={`Sin resultados para «${term}»`}
+        description="Prueba con otro nombre o con el identificador fiscal."
+      />
     ) : (
       <EmptyState
         title="Aún no hay clientes"

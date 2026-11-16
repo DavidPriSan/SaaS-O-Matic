@@ -27,9 +27,7 @@ describe('createCustomerSchema', () => {
     const result = createCustomerSchema.safeParse({ ...validCustomer, taxId: '12345678A' });
 
     expect(result.success).toBe(false);
-    expect(result.error?.issues).toEqual([
-      expect.objectContaining({ path: ['taxId'], message: 'INVALID_CONTROL' }),
-    ]);
+    expect(result.error?.issues).toEqual([expect.objectContaining({ path: ['taxId'], message: 'INVALID_CONTROL' })]);
   });
 
   it.each([

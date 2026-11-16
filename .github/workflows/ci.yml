@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality (format, lint, types, audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Dependency audit
+        run: npm audit --audit-level=moderate
+
+  test:
+    name: Test & build (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Minimum supported runtime (engines >= 22)
+          - os: ubuntu-latest
+            node: 22
+          # Current LTS
+          - os: ubuntu-latest
+            node: 26
+          # Development OS: validates the native better-sqlite3 binary on Windows
+          - os: windows-latest
+            node: 26
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - name: Tests with coverage thresholds
+        run: npm run test:coverage
+      - name: Production build
+        run: npm run build

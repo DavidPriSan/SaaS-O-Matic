@@ -12,27 +12,69 @@ type Usage = [activeUsers: number, storageGb: number, apiCalls: number];
 /** Fictitious companies with algorithmically valid tax IDs. */
 const SAMPLE_DATA: Array<{ customer: CreateCustomerInput; usage: Usage[] }> = [
   {
-    customer: { companyName: 'Acme Ibérica S.L.', taxId: 'B12345674', email: 'it@acme-iberica.es', countryCode: 'ES', plan: 'pro' },
-    usage: [[15, 300, 1_250_500], [40, 200, 800_000]],
+    customer: {
+      companyName: 'Acme Ibérica S.L.',
+      taxId: 'B12345674',
+      email: 'it@acme-iberica.es',
+      countryCode: 'ES',
+      plan: 'pro',
+    },
+    usage: [
+      [15, 300, 1_250_500],
+      [40, 200, 800_000],
+    ],
   },
   {
-    customer: { companyName: 'Nébula Analytics S.A.', taxId: 'A58818501', email: 'compras@nebula.es', countryCode: 'ES', plan: 'enterprise' },
-    usage: [[120, 900, 9_000_000], [250, 1500, 14_500_000]],
+    customer: {
+      companyName: 'Nébula Analytics S.A.',
+      taxId: 'A58818501',
+      email: 'compras@nebula.es',
+      countryCode: 'ES',
+      plan: 'enterprise',
+    },
+    usage: [
+      [120, 900, 9_000_000],
+      [250, 1500, 14_500_000],
+    ],
   },
   {
-    customer: { companyName: 'Laura Gómez Consulting', taxId: '12345678Z', email: 'laura@lgconsulting.es', countryCode: 'ES', plan: 'basic' },
+    customer: {
+      companyName: 'Laura Gómez Consulting',
+      taxId: '12345678Z',
+      email: 'laura@lgconsulting.es',
+      countryCode: 'ES',
+      plan: 'basic',
+    },
     usage: [[3, 10, 20_000]],
   },
   {
-    customer: { companyName: 'Kowalski Digital', taxId: 'X1234567L', email: 'hello@kowalski.dev', countryCode: 'ES', plan: 'basic' },
+    customer: {
+      companyName: 'Kowalski Digital',
+      taxId: 'X1234567L',
+      email: 'hello@kowalski.dev',
+      countryCode: 'ES',
+      plan: 'basic',
+    },
     usage: [],
   },
   {
-    customer: { companyName: 'Bayern Cloud GmbH', taxId: 'DE123456789', email: 'einkauf@bayern-cloud.de', countryCode: 'DE', plan: 'enterprise' },
+    customer: {
+      companyName: 'Bayern Cloud GmbH',
+      taxId: 'DE123456789',
+      email: 'einkauf@bayern-cloud.de',
+      countryCode: 'DE',
+      plan: 'enterprise',
+    },
     usage: [[60, 1200, 12_000_000]],
   },
   {
-    customer: { companyName: 'Austin Data Inc.', taxId: '12-3456789', email: 'billing@austindata.com', countryCode: 'US', plan: 'pro' },
+    customer: {
+      companyName: 'Austin Data Inc.',
+      taxId: '12-3456789',
+      email: 'billing@austindata.com',
+      countryCode: 'US',
+      plan: 'pro',
+    },
     usage: [[11, 250, 1_000_000]],
   },
 ];
@@ -56,7 +98,9 @@ if (customersService.search({ limit: 1 }).length > 0) {
     for (const { customer, usage } of SAMPLE_DATA) {
       const created = customersService.create(createCustomerSchema.parse(customer));
       for (const [activeUsers, storageGb, apiCalls] of usage) {
-        simulationsService.create(createSimulationSchema.parse({ customerId: created.id, activeUsers, storageGb, apiCalls }));
+        simulationsService.create(
+          createSimulationSchema.parse({ customerId: created.id, activeUsers, storageGb, apiCalls }),
+        );
       }
     }
   })();

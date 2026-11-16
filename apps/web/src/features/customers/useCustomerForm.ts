@@ -1,4 +1,10 @@
-import { createCustomerSchema, validateFiscalId, type CountryCode, type CreateCustomerInput, type Customer } from '@saas/shared';
+import {
+  createCustomerSchema,
+  validateFiscalId,
+  type CountryCode,
+  type CreateCustomerInput,
+  type Customer,
+} from '@saas/shared';
 import { useMemo, useState, type FormEvent } from 'react';
 import { describeError } from '../../api/errors';
 import { ApiError } from '../../api/http';
@@ -55,7 +61,10 @@ export function useCustomerForm(onCreated: (customer: Customer) => void) {
   const mutation = useCreateCustomer();
 
   const errors = useMemo(() => clientErrors(values), [values]);
-  const taxIdCheck = useMemo(() => validateFiscalId(values.taxId, values.countryCode), [values.taxId, values.countryCode]);
+  const taxIdCheck = useMemo(
+    () => validateFiscalId(values.taxId, values.countryCode),
+    [values.taxId, values.countryCode],
+  );
 
   function setField<K extends FieldName>(field: K, value: FormValues[K]): void {
     setValues((current) => ({ ...current, [field]: value }));

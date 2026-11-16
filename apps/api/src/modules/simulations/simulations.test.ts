@@ -6,7 +6,11 @@ let customerId: number;
 
 beforeEach(async () => {
   ctx = await createTestApp();
-  const res = await ctx.app.inject({ method: 'POST', url: '/customers', payload: validCustomer({ plan: 'pro', countryCode: 'ES' }) });
+  const res = await ctx.app.inject({
+    method: 'POST',
+    url: '/customers',
+    payload: validCustomer({ plan: 'pro', countryCode: 'ES' }),
+  });
   customerId = res.json().id;
 });
 
@@ -54,7 +58,14 @@ describe('POST /simulations', () => {
   });
 
   it('rejects client-provided amounts or plan (server is the pricing authority)', async () => {
-    const res = await postSimulation({ customerId, activeUsers: 15, storageGb: 0, apiCalls: 0, totalCents: 1, plan: 'basic' });
+    const res = await postSimulation({
+      customerId,
+      activeUsers: 15,
+      storageGb: 0,
+      apiCalls: 0,
+      totalCents: 1,
+      plan: 'basic',
+    });
 
     expect(res.statusCode).toBe(400);
     expect(res.json().error.code).toBe('VALIDATION_ERROR');

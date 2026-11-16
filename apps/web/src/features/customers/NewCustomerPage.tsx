@@ -13,7 +13,11 @@ export function NewCustomerPage() {
         subtitle="Registra un cliente corporativo. En España se valida el DNI/NIE/CIF con el algoritmo oficial."
         backTo={{ to: '/', label: 'Volver a clientes' }}
       />
-      <CustomerForm onCreated={(customer) => navigate(`/customers/${customer.id}`)} />
+      <CustomerForm
+        onCreated={(customer) => {
+          void navigate(`/customers/${customer.id}`);
+        }}
+      />
     </div>
   );
 }

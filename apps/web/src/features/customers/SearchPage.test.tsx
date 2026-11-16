@@ -42,7 +42,9 @@ describe('SearchPage', () => {
 
   it('shows an error with a working retry', async () => {
     let calls = 0;
-    mockFetch(() => (++calls === 1 ? { status: 500, body: errorBody('INTERNAL_ERROR') } : { body: { items: customers } }));
+    mockFetch(() =>
+      ++calls === 1 ? { status: 500, body: errorBody('INTERNAL_ERROR') } : { body: { items: customers } },
+    );
     const { user } = renderRoute('/');
 
     await user.click(await screen.findByRole('button', { name: 'Reintentar' }));

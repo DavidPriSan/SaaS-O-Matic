@@ -40,6 +40,18 @@ describe('infrastructure', () => {
     expect(denied.headers['access-control-allow-origin']).not.toBe('https://evil.example');
   });
 
+  it('hides internal details of unexpected errors behind a generic 500', async () => {
+    ctx.app.get('/boom', () => {
+      throw new Error('SQLITE secret internal detail');
+    });
+
+    const res = await ctx.app.inject({ method: 'GET', url: '/boom' });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.json()).toEqual({ error: { code: 'INTERNAL_ERROR', message: 'Unexpected server error' } });
+    expect(res.body).not.toContain('secret');
+  });
+
   it('rejects bodies above the size limit', async () => {
     const res = await ctx.app.inject({
       method: 'POST',

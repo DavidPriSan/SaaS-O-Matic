@@ -34,7 +34,10 @@ interface RequestOptions<T> {
 export const API_BASE = '/api';
 
 /** Every response is validated: a backend contract change surfaces as an error, not as a broken UI. */
-export async function apiRequest<T>(path: string, { method = 'GET', body, schema, signal }: RequestOptions<T>): Promise<T> {
+export async function apiRequest<T>(
+  path: string,
+  { method = 'GET', body, schema, signal }: RequestOptions<T>,
+): Promise<T> {
   const response = await send(`${API_BASE}${path}`, {
     method,
     signal: signal ?? null,

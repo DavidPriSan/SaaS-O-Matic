@@ -14,7 +14,10 @@ export function runMigrations(db: Db, dir: string = MIGRATIONS_DIR): string[] {
   )`);
 
   const applied = new Set(
-    db.prepare<[], { version: string }>('SELECT version FROM schema_migrations').all().map((row) => row.version),
+    db
+      .prepare<[], { version: string }>('SELECT version FROM schema_migrations')
+      .all()
+      .map((row) => row.version),
   );
   const pending = readdirSync(dir)
     .filter((file) => MIGRATION_FILE.test(file) && !applied.has(file))

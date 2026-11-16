@@ -4,7 +4,8 @@ import styles from './Button.module.css';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 
-const className = (variant: Variant, extra?: string) => [styles.button, styles[variant], extra].filter(Boolean).join(' ');
+const className = (variant: Variant, extra?: string) =>
+  [styles.button, styles[variant], extra].filter(Boolean).join(' ');
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -12,7 +13,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
-export function Button({ variant = 'primary', loading = false, disabled, children, className: extra, ...rest }: ButtonProps) {
+export function Button({
+  variant = 'primary',
+  loading = false,
+  disabled,
+  children,
+  className: extra,
+  ...rest
+}: ButtonProps) {
   return (
     <button {...rest} className={className(variant, extra)} disabled={disabled || loading} aria-busy={loading}>
       {loading && <span className={styles.spinner} aria-hidden="true" />}

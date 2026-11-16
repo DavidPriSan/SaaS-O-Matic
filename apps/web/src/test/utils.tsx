@@ -34,15 +34,17 @@ export function mockFetch(handler: (request: RecordedRequest) => MockResponse): 
   const requests: RecordedRequest[] = [];
   vi.stubGlobal(
     'fetch',
-    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
       const request: RecordedRequest = {
-        url: String(input),
+        url: input instanceof Request ? input.url : input.toString(),
         method: init?.method ?? 'GET',
         body: typeof init?.body === 'string' ? JSON.parse(init.body) : undefined,
       };
       requests.push(request);
       const { status = 200, body } = handler(request);
-      return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+      return Promise.resolve(
+        new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } }),
+      );
     }),
   );
   return requests;

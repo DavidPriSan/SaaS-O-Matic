@@ -12,7 +12,8 @@ afterEach(async () => {
   await ctx.close();
 });
 
-const postCustomer = (payload: unknown) => ctx.app.inject({ method: 'POST', url: '/customers', payload: payload as object });
+const postCustomer = (payload: unknown) =>
+  ctx.app.inject({ method: 'POST', url: '/customers', payload: payload as object });
 
 async function seedCustomers(customers: CreateCustomerInput[]): Promise<void> {
   for (const customer of customers) {

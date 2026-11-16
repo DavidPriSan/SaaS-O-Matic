@@ -70,7 +70,7 @@ function toSimulation(row: SimulationRow): Simulation {
     createdAt: row.created_at,
     quote: {
       pricingVersion: row.pricing_version,
-      tiers: JSON.parse(row.tier_breakdown),
+      tiers: JSON.parse(row.tier_breakdown) as unknown, // validated by simulationSchema below
       baseCents: row.base_cents,
       storageOverageGb: row.storage_overage_gb,
       storageOverageCents: row.storage_overage_cents,

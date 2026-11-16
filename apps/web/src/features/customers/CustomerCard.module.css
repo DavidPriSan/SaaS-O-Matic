@@ -9,7 +9,10 @@
   box-shadow: var(--shadow-card);
   color: inherit;
   text-decoration: none;
-  transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s,
+    transform 0.15s;
 }
 
 .card:hover {

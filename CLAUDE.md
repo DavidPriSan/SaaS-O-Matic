@@ -26,6 +26,11 @@ npm workspaces · TypeScript strict · Fastify · Zod · better-sqlite3 · React
 - API: tests de integración con `app.inject()` y SQLite `:memory:`.
 - Cualquier bug encontrado requiere un test que lo reproduzca antes de corregirlo.
 
+## Calidad (CI en cada push y PR: `.github/workflows/ci.yml`)
+- Antes de cada commit: `npm run check` (format, lint, typecheck, tests con cobertura y build). Si falla en local, fallará en la CI.
+- Cobertura mínima: `shared` 95 %, API 90 % de líneas y 80 % de ramas. No bajes un umbral para que pase: añade el test.
+- No desactives reglas de ESLint en línea sin un comentario que lo justifique.
+
 ## Forma de trabajar
 - Una feature por iteración, con el alcance de ficheros acotado.
 - Al terminar: lista de ficheros cambiados, cómo verificarlo y resultado de `npm test`.

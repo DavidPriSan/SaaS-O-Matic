@@ -1,0 +1,7 @@
+dist
+coverage
+node_modules
+package-lock.json
+apps/api/data
+# Documentation is hand-formatted (Spanish prose and wide tables)
+*.md

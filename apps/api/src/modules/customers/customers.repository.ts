@@ -50,7 +50,10 @@ export function createCustomersRepository(db: Db) {
   const findByIdStmt = db.prepare<[number], CustomerRow>('SELECT * FROM customers WHERE id = ?');
 
   // Name: case/accent-insensitive "contains". Tax ID: prefix on the normalized value. Always parameterized.
-  const searchStmt = db.prepare<{ namePattern: string | null; taxIdPattern: string | null; limit: number }, CustomerRow>(`
+  const searchStmt = db.prepare<
+    { namePattern: string | null; taxIdPattern: string | null; limit: number },
+    CustomerRow
+  >(`
     SELECT * FROM customers
     WHERE @namePattern IS NULL
        OR search_normalize(company_name) LIKE @namePattern ESCAPE '\\'

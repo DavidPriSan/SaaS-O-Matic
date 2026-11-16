@@ -11,7 +11,9 @@ export const routes: RouteObject[] = [
   {
     path: '/',
     element: <Layout />,
-    errorElement: <ErrorState title="Error inesperado" message="La aplicación ha encontrado un error. Recarga la página." />,
+    errorElement: (
+      <ErrorState title="Error inesperado" message="La aplicación ha encontrado un error. Recarga la página." />
+    ),
     children: [
       { index: true, element: <SearchPage /> },
       { path: 'customers/new', element: <NewCustomerPage /> },

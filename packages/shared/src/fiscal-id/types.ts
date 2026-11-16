@@ -7,5 +7,4 @@ export type SpanishIdType = Exclude<FiscalIdType, 'GENERIC'>;
 export type FiscalIdError = 'EMPTY' | 'INVALID_FORMAT' | 'INVALID_CONTROL';
 
 export type FiscalIdResult =
-  | { valid: true; normalized: string; type: FiscalIdType }
-  | { valid: false; normalized: string; reason: FiscalIdError };
+  { valid: true; normalized: string; type: FiscalIdType } | { valid: false; normalized: string; reason: FiscalIdError };
