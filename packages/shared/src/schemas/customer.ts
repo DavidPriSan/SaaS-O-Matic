@@ -6,18 +6,18 @@ import { PLAN_IDS } from '../pricing/plans';
 
 /** POST /customers body (spec 03). Output has the normalized taxId and its detected type. */
 export const createCustomerSchema = z
-  .object({
+  .strictObject({
     companyName: z.string().trim().min(2).max(120),
     taxId: z.string().max(32),
-    email: z.string().trim().toLowerCase().email().max(254),
+    // Normalize first, then validate the format (in Zod 4 a format check runs before chained trims).
+    email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
     countryCode: z.enum(COUNTRY_CODES),
     plan: z.enum(PLAN_IDS),
   })
-  .strict()
   .transform((data, ctx) => {
     const fiscalId = validateFiscalId(data.taxId, data.countryCode);
     if (!fiscalId.valid) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['taxId'], message: fiscalId.reason });
+      ctx.addIssue({ code: 'custom', path: ['taxId'], message: fiscalId.reason });
       return z.NEVER;
     }
     return { ...data, taxId: fiscalId.normalized, taxIdType: fiscalId.type };

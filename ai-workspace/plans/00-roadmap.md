@@ -7,7 +7,7 @@ Ninguna fase empieza sin que la anterior cumpla sus criterios de aceptación.
 |------|-----------|------------------------|
 | **0. Specs** | `ai-workspace/` y `CLAUDE.md` | Ambigüedades resueltas y documentadas ✅ |
 | **1. Shared (TDD)** | `packages/shared` | Tests escritos **antes** que la implementación. Pasan todos los ejemplos de spec 01 §5 y los vectores de spec 02 §5 ✅ |
-| **2. API** | `apps/api` | Tests de integración de cada endpoint (feliz, 400, 404, 409). La BD tiene los `CHECK`. Seed funcionando |
+| **2. API** | `apps/api` | Tests de integración de cada endpoint (feliz, 400, 404, 409). La BD tiene los `CHECK`. Seed funcionando ✅ |
 | **3. Front: base** | Layout, router, cliente API, dashboard y buscador, alta de cliente | Búsqueda por nombre y NIF contra la API real. Estados de carga, error y vacío |
 | **4. Front: detalle y simulador** | Cards, simulador, historial | Mover el slider recalcula al instante. Guardar persiste y refresca el historial |
 | **5. Divisas** | `currency/` | Cambiar de divisa convierte todos los importes. Con la API caída la app sigue en EUR y muestra un banner |

@@ -46,7 +46,7 @@
 Errores: 400, 409.
 
 ## `GET /customers?q=&limit=`
-- `q` (opcional, máximo 100 caracteres): búsqueda que no distingue mayúsculas en `companyName` (contiene) **o** en `taxId` (prefijo, comparado con `q` normalizado).
+- `q` (opcional, máximo 100 caracteres): búsqueda que no distingue mayúsculas **ni tildes** en `companyName` (contiene; "nebula" encuentra "Nébula") **o** en `taxId` (prefijo, comparado con `q` normalizado).
 - Se escapan los comodines `%` y `_` de LIKE. Las consultas van **siempre parametrizadas**.
 - `limit`: 1–50, por defecto 20. Orden: `createdAt DESC`.
 - Sin `q` → últimos clientes registrados (alimenta el dashboard).

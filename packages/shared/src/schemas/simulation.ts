@@ -9,14 +9,12 @@ const boundedInt = ({ min, max }: { min: number; max: number }) => z.number().in
  * POST /simulations body (spec 03). Strict: plan, country and amounts are never accepted
  * from the client; the server derives them from the stored customer and recalculates.
  */
-export const createSimulationSchema = z
-  .object({
-    customerId: z.number().int().positive(),
-    activeUsers: boundedInt(QUOTE_LIMITS.activeUsers),
-    storageGb: boundedInt(QUOTE_LIMITS.storageGb),
-    apiCalls: boundedInt(QUOTE_LIMITS.apiCalls),
-  })
-  .strict();
+export const createSimulationSchema = z.strictObject({
+  customerId: z.number().int().positive(),
+  activeUsers: boundedInt(QUOTE_LIMITS.activeUsers),
+  storageGb: boundedInt(QUOTE_LIMITS.storageGb),
+  apiCalls: boundedInt(QUOTE_LIMITS.apiCalls),
+});
 
 export type CreateSimulationInput = z.infer<typeof createSimulationSchema>;
 

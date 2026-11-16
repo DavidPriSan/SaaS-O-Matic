@@ -14,7 +14,8 @@ Formato corto: contexto → decisión → alternativas descartadas → consecuen
 
 ## ADR-003 · Fastify + Zod + better-sqlite3 sin ORM
 - **Decisión**: Fastify (rápido, `inject()` para tests sin abrir puertos, logger integrado), Zod (esquemas compartidos con el front) y better-sqlite3 (síncrono, sencillo y con prebuilds para Windows).
-- **Descartado**: Express (más boilerplate para validación y errores); Prisma/TypeORM (demasiado peso para 2 tablas y ocultan el SQL que queremos enseñar); `node:sqlite` (requiere Node ≥ 22.5).
+- **Descartado**: Express (más boilerplate para validación y errores); Prisma/TypeORM (demasiado peso para 2 tablas y ocultan el SQL que queremos enseñar); `node:sqlite` (al pasar a Node 26 ya está disponible, pero `better-sqlite3` es más maduro, tiene tipos genéricos por *statement* y funciones SQL definidas por el usuario, que usamos en la búsqueda).
+- **Validación de entrada**: Zod `parse()` directamente en las rutas, sin el *type provider* de Fastify. Una dependencia menos, y los `ZodError` llegan al único error handler.
 
 ## ADR-004 · Snapshot de tarificación en cada simulación
 - **Decisión**: persistir el desglose, el IVA, el plan, el país y `pricingVersion`.
@@ -30,3 +31,12 @@ Formato corto: contexto → decisión → alternativas descartadas → consecuen
 
 ## ADR-007 · Validación en 3 capas
 Front (UX inmediata) → Zod en la API (autoridad) → `CHECK`/`UNIQUE` en SQLite (última defensa). La regla vive en `shared`, así que front y API no pueden contradecirse.
+
+## ADR-008 · Runtime Node ≥ 22 (desarrollado sobre Node 26 LTS)
+- **Contexto**: Fastify 5 actual → `light-my-request@6.8` → `cookie@2`, que exige Node ≥ 22. Además, Node 20 está fuera de soporte desde abril de 2026.
+- **Decisión**: `engines.node >= 22` y `.nvmrc`. Desarrollo y tests sobre Node 26 (LTS activa).
+- **Descartado**: fijar Fastify o light-my-request a versiones antiguas, o forzar `cookie@1` con `overrides` (cambia de API). Sería deuda técnica para quedarnos en un runtime sin parches de seguridad.
+
+## ADR-009 · Cero vulnerabilidades conocidas en `npm audit`
+- **Decisión**: Zod 3 → **Zod 4** (GHSA-mrhx-c7xc-m3w5, *high*) y Vitest 2 → **Vitest 5** (cadena vite, esbuild y tinypool, con 2 *critical*, solo en dev).
+- **Consecuencias**: cambios mínimos de API (`z.strictObject`, `z.email()` vía `pipe`, `code: 'custom'`). Los 95 tests de shared siguieron en verde tras la migración.
