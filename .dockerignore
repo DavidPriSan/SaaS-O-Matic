@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/coverage
+apps/api/data
+.git
+.github
+.vscode
+ai-workspace
+*.md
+*.log

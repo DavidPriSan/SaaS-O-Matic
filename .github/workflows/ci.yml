@@ -56,3 +56,19 @@ jobs:
         run: npm run test:coverage
       - name: Production build
         run: npm run build
+
+  docker:
+    name: Docker Compose (build, start, smoke test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build images and start (waits for healthchecks)
+        run: docker compose up -d --build --wait --wait-timeout 180
+      - name: Smoke test
+        run: bash scripts/docker-smoke.sh
+      - name: Container logs
+        if: failure()
+        run: docker compose logs
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

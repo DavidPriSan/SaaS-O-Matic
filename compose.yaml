@@ -1,0 +1,27 @@
+# `docker compose up --build` → http://localhost:8080 (no Node.js needed on the host)
+name: saas-o-matic
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    environment:
+      CORS_ORIGIN: http://localhost:8080
+    volumes:
+      - db-data:/data
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    ports:
+      - '8080:80'
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db-data:
