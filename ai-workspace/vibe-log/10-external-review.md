@@ -38,6 +38,9 @@ Lección: **la IA confirmó una hipótesis ajena con una prueba defectuosa**, y 
 
 Se dejó fuera, documentado en la spec 04: `customers.country_code` sigue con `length = 2`. Reconstruir `customers` con `foreign_keys = ON` borraría en cascada sus simulaciones, y ese pragma no se puede cambiar dentro de la transacción de la migración.
 
+### El E2E falló en la CI (y tenía razón)
+En el primer push, el caso de 320 px falló en GitHub y pasaba en local. La hipótesis de la IA ("fuentes de Linux") **falló al reproducirla** en la imagen oficial de Playwright, donde pasaba. Sin acceso a los logs, en vez de probar arreglos a ciegas se añadió el reporter `github` de Playwright, que convierte cada fallo en una anotación pública del commit. La anotación dio el dato: en el runner, "1.003.400,00 MXN" mide **178 px** (151 px en Windows) y la tabla sobresalía 2 px. El arreglo anterior estaba **ajustado a las medidas de unas fuentes concretas**: un usuario de Linux o Android lo habría visto roto. Por debajo de 400 px, cada fila del desglose pasa a ser una línea flexible: si la etiqueta y el importe no caben juntos, el importe baja. Se verificó en local forzando una fuente mucho más ancha (Verdana con espaciado extra) antes de volver a subirlo, y la CI quedó en verde en los 6 jobs.
+
 ## 4. Punto 4: evidencia bruta
 Los vibe-logs los redacta la IA durante el trabajo. Los prompts se citan literalmente, pero el resto es narración. La evidencia bruta **no la puede generar la IA**: tiene que salir de la conversación real. Pendiente para mí: exportarla con `/export` a `ai-workspace/conversation/`, después de revisar que no contenga datos personales.
 
