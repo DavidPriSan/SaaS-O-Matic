@@ -12,6 +12,7 @@ Cómo se ha diseñado, planificado y construido SaaS-O-Matic con IA (Claude Code
 | [architecture/](architecture/) | 2 · Arquitectura | Estructura y capas, estrategia de tests y **13 ADRs** (decisiones con alternativas descartadas) |
 | [../CLAUDE.md](../CLAUDE.md) | 2 · Directrices para la IA | Reglas permanentes: capas, dinero en céntimos, sin `any`, tamaño de ficheros, TDD, "si la spec es ambigua, pregunta" |
 | [vibe-log/](vibe-log/) | 3 · Vibe coding y control de calidad | Diario por sesión: prompt → propuesta de la IA → revisión → corrección |
+| [conversation/](conversation/README.md) | 3 · Evidencia del proceso | **Extractos literales** de la conversación real con la IA (4 momentos clave enlazados a sus commits) y las capturas del momento en que un test desmintió a la IA |
 
 Las reglas de `CLAUDE.md` no se quedaron en el papel: **ESLint las hace ejecutables** (`no-explicit-any`, `max-lines`, `complexity`…) y la **CI** las comprueba en cada push (ADR-011).
 

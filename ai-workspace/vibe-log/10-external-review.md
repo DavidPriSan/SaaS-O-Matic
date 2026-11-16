@@ -42,7 +42,9 @@ Se dejó fuera, documentado en la spec 04: `customers.country_code` sigue con `l
 En el primer push, el caso de 320 px falló en GitHub y pasaba en local. La hipótesis de la IA ("fuentes de Linux") **falló al reproducirla** en la imagen oficial de Playwright, donde pasaba. Sin acceso a los logs, en vez de probar arreglos a ciegas se añadió el reporter `github` de Playwright, que convierte cada fallo en una anotación pública del commit. La anotación dio el dato: en el runner, "1.003.400,00 MXN" mide **178 px** (151 px en Windows) y la tabla sobresalía 2 px. El arreglo anterior estaba **ajustado a las medidas de unas fuentes concretas**: un usuario de Linux o Android lo habría visto roto. Por debajo de 400 px, cada fila del desglose pasa a ser una línea flexible: si la etiqueta y el importe no caben juntos, el importe baja. Se verificó en local forzando una fuente mucho más ancha (Verdana con espaciado extra) antes de volver a subirlo, y la CI quedó en verde en los 6 jobs.
 
 ## 4. Punto 4: evidencia bruta
-Los vibe-logs los redacta la IA durante el trabajo. Los prompts se citan literalmente, pero el resto es narración. La evidencia bruta **no la puede generar la IA**: tiene que salir de la conversación real. Pendiente para mí: exportarla con `/export` a `ai-workspace/conversation/`, después de revisar que no contenga datos personales.
+Los vibe-logs los redacta la IA durante el trabajo. Los prompts se citan literalmente, pero el resto es narración. La evidencia bruta tiene que salir de la conversación real, no de una reescritura.
+
+Decisión: en vez de exportar la conversación completa (muy larga, con mucho ruido técnico y con riesgo de datos personales), se hizo una **selección de cuatro momentos clave** extraída de la transcripción local de la sesión. Está en [`conversation/`](../conversation/README.md), con las horas cuadradas con los commits. Cada cita se comprobó automáticamente contra la transcripción antes de publicarla, y yo la revisé.
 
 ## 5. Resultado
 244 tests (shared 119, API 67, web 58) más 6 E2E. `npm run check` en verde, igual que la CI.
