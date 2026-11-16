@@ -19,6 +19,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Dates render in the viewer's zone; pin one so tests give the same result locally (CET) and in CI (UTC).
+    env: { TZ: 'Europe/Madrid' },
     // Report only (no threshold): UI tests target user flows rather than line counts.
     coverage: {
       provider: 'v8',

@@ -34,5 +34,13 @@ Los 48 tests del front pasaron a la primera. En lugar de darlo por bueno, se com
 - `formatDateTime` solo aceptaba ISO strings y forzaba `new Date(ms).toISOString()`, una conversión innecesaria. Se amplía para aceptar epoch ms.
 - Choque de nombres: `DisplayCurrency` existía en `shared` (código de divisa) y en `formatMoney` (código + tipo). Se renombra este último a `MoneyDisplay`.
 
+## 5. Feedback mío tras probarlo en el navegador
+> "Pone *Tipos de cambio actualizados: 16 nov 2026, 1:02*, pero en mi horario local son las 11:13. ¿Se puede adaptar esa hora al equipo desde el que se ve?"
+
+- **Diagnóstico de la IA (con datos, no suposiciones):** la hora **ya** era local. El proveedor publica una vez al día a las 00:02 UTC = **1:02 en Madrid** (CET). Los tipos eran de la 1:02, no de las 11:02.
+- **Problema real detectado:** el texto era ambiguo ("actualizados" se lee como "la app los consultó a esa hora").
+- **Cambio:** "Tipos publicados el 16 nov 2026, 1:02 (CET) · próxima actualización: 17 nov, 1:18". Se muestra la zona horaria del equipo, la fecha de publicación (no la de consulta) y que la actualización es diaria. Para ello se lee también `time_next_update_unix`, y la caché pasa a la clave `v2` (las entradas antiguas se descartan solas al validarlas).
+- **Riesgo evitado:** los tests de fechas dependían de la zona horaria de la máquina (CET en local, UTC en la CI). Se fija `TZ=Europe/Madrid` en la configuración de Vitest: ahora son deterministas en cualquier máquina.
+
 ## Resultado
 `npm run check` → OK. **189 tests** (95 shared + 45 API + 49 web). Cobertura web 95,7 %.

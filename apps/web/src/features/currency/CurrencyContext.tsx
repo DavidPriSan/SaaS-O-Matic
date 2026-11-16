@@ -17,7 +17,9 @@ export interface CurrencyContextValue {
   display: MoneyDisplay;
   available: readonly DisplayCurrency[];
   status: RatesStatus;
+  /** Provider publication time of the rates in use (epoch ms). */
   updatedAt: number | undefined;
+  nextUpdateAt: number | undefined;
   retry: () => void;
 }
 
@@ -28,6 +30,7 @@ const FALLBACK: CurrencyContextValue = {
   available: ['EUR'],
   status: 'ready',
   updatedAt: undefined,
+  nextUpdateAt: undefined,
   retry: () => undefined,
 };
 
@@ -64,6 +67,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       available: data ? DISPLAY_CURRENCIES.filter((currency) => data.rates[currency] !== undefined) : ['EUR'],
       status: isPending ? 'loading' : !data ? 'error' : isError ? 'stale' : 'ready',
       updatedAt: data?.updatedAt,
+      nextUpdateAt: data?.nextUpdateAt,
       retry: () => void refetch(),
     }),
     [selected, setSelected, data, isPending, isError, refetch],

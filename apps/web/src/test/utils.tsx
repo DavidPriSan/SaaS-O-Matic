@@ -37,7 +37,8 @@ export interface RecordedRequest {
 export const ratesResponse = (rates: Record<string, number> = { EUR: 1, USD: 1.1, GBP: 0.85, JPY: 176 }) => ({
   result: 'success',
   base_code: 'EUR',
-  time_last_update_unix: 1794787351,
+  time_last_update_unix: 1794787351, // 2026-11-16 00:02:31 UTC
+  time_next_update_unix: 1794874701, // 2026-11-17 00:18:21 UTC
   rates,
 });
 

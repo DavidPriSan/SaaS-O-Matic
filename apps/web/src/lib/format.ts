@@ -12,6 +12,22 @@ export const formatDate = (value: DateInput): string => dateFormatter.format(new
 
 export const formatDateTime = (value: DateInput): string => dateTimeFormatter.format(new Date(value));
 
+// No timeZone option: Intl uses the viewer's own time zone (the browser's), which is what we want.
+const shortDateTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
+  day: 'numeric',
+  month: 'short',
+  hour: 'numeric',
+  minute: '2-digit',
+});
+const zoneFormatter = new Intl.DateTimeFormat(LOCALE, { timeZoneName: 'short' });
+
+/** "17 nov, 1:18" in the viewer's time zone. */
+export const formatShortDateTime = (value: DateInput): string => shortDateTimeFormatter.format(new Date(value));
+
+/** Viewer's time zone abbreviation at that instant: "CET" in winter, "CEST" in summer. */
+export const formatTimeZone = (value: DateInput): string =>
+  zoneFormatter.formatToParts(new Date(value)).find((part) => part.type === 'timeZoneName')?.value ?? '';
+
 export const formatNumber = (value: number): string => numberFormatter.format(value);
 
 /** 2100 bp → "21 %" */

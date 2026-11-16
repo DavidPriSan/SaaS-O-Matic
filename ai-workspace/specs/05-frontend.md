@@ -24,7 +24,7 @@ Cabecera global: logo y **selector de divisa**, presente en todas las vistas.
 |--------|----------------|
 | Cargando | Selector deshabilitado con *spinner*. Importes en EUR |
 | Error | Banner no bloqueante "No se pudieron cargar los tipos de cambio · Reintentar". Se fuerza EUR. La app sigue siendo usable |
-| OK | Pie con "Tipos actualizados: {fecha}" (`time_last_update_unix`) |
+| OK | Pie con "Tipos publicados el {fecha} ({zona}) · próxima actualización: {fecha}" (`time_last_update_unix` / `time_next_update_unix`), en la zona horaria del equipo que visualiza |
 
 **Ampliaciones y decisiones de la fase 5:**
 - CORS verificado (`access-control-allow-origin: *`): llamada directa desde el navegador, sin proxy en la API.

@@ -5,12 +5,13 @@ import { ExchangeRatesError, fetchExchangeRates } from './exchangeRates';
 const withRates = (body: unknown, status = 200) => mockFetch(() => ({}), { exchangeRates: { status, body } });
 
 describe('fetchExchangeRates', () => {
-  it('keeps only the display currencies (EUR = 1) and converts the timestamp to ms', async () => {
+  it('keeps only the display currencies (EUR = 1) and converts the timestamps to ms', async () => {
     withRates(ratesResponse({ EUR: 1, USD: 1.1, AED: 4.05, ZAR: 20.1 }));
 
     await expect(fetchExchangeRates()).resolves.toEqual({
       rates: { EUR: 1, USD: 1.1 },
       updatedAt: 1794787351000,
+      nextUpdateAt: 1794874701000,
     });
   });
 

@@ -96,7 +96,10 @@ describe('display currency', () => {
   });
 
   it('keeps using cached rates when the provider is down, and says so', async () => {
-    writeRatesCache({ rates: { EUR: 1, USD: 1.2 }, updatedAt: 1794787351000 }, Date.now() - 2 * RATES_STALE_MS);
+    writeRatesCache(
+      { rates: { EUR: 1, USD: 1.2 }, updatedAt: 1794787351000, nextUpdateAt: 1794874701000 },
+      Date.now() - 2 * RATES_STALE_MS,
+    );
     window.localStorage.setItem('saas-o-matic:currency', 'USD');
     mockApi({ exchangeRates: { status: 503, body: {} } });
     await openCustomer();
@@ -107,7 +110,7 @@ describe('display currency', () => {
   });
 
   it('does not call the provider while cached rates are fresh', async () => {
-    writeRatesCache({ rates: { EUR: 1, USD: 1.1 }, updatedAt: 1794787351000 }, Date.now());
+    writeRatesCache({ rates: { EUR: 1, USD: 1.1 }, updatedAt: 1794787351000, nextUpdateAt: 1794874701000 }, Date.now());
     mockApi();
     await openCustomer();
 
@@ -115,11 +118,15 @@ describe('display currency', () => {
     expect(exchangeCalls()).toBe(0);
   });
 
-  it('shows the update time and the attribution required by the provider', async () => {
+  it('shows publication and next update times in the viewer time zone, plus the required attribution', async () => {
     mockApi();
     await openCustomer();
 
-    expect(await screen.findByText(/Tipos de cambio actualizados:/)).toBeInTheDocument();
+    // Provider publishes at 00:02 UTC → 1:02 in Madrid (TZ pinned in vite.config). Not the fetch time.
+    const footer = await screen.findByText(/Tipos publicados el/);
+    expect(footer).toHaveTextContent(
+      'Tipos publicados el 16 nov 2026, 1:02 (CET) · próxima actualización: 17 nov, 1:18',
+    );
     // Fresh rates are persisted for the next visit (and for provider outages).
     expect(readRatesCache()?.data.rates.USD).toBe(1.1);
     expect(screen.getByRole('link', { name: 'Rates By Exchange Rate API' })).toHaveAttribute(

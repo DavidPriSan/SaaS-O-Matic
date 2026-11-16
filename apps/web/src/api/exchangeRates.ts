@@ -7,8 +7,10 @@ export type DisplayRates = Partial<Record<DisplayCurrency, number>>;
 
 export interface ExchangeRates {
   rates: DisplayRates;
-  /** Provider's last update, epoch ms. */
+  /** When the provider published these rates, epoch ms. */
   updatedAt: number;
+  /** When the provider will publish the next ones (daily), epoch ms. */
+  nextUpdateAt: number;
 }
 
 export class ExchangeRatesError extends Error {
@@ -20,6 +22,7 @@ const responseSchema = z.object({
   result: z.literal('success'),
   base_code: z.literal('EUR'),
   time_last_update_unix: z.number().int().positive(),
+  time_next_update_unix: z.number().int().positive(),
   rates: z.record(z.string(), z.number().positive()),
 });
 
@@ -36,7 +39,12 @@ export async function fetchExchangeRates(signal?: AbortSignal): Promise<Exchange
   const parsed = responseSchema.safeParse(await response.json().catch(() => null));
   if (!parsed.success) throw new ExchangeRatesError('Unexpected response shape');
 
-  return { rates: pickDisplayRates(parsed.data.rates), updatedAt: parsed.data.time_last_update_unix * 1000 };
+  const { rates, time_last_update_unix, time_next_update_unix } = parsed.data;
+  return {
+    rates: pickDisplayRates(rates),
+    updatedAt: time_last_update_unix * 1000,
+    nextUpdateAt: time_next_update_unix * 1000,
+  };
 }
 
 /** Keep only the currencies offered in the UI (166 come back); EUR is always 1. */
