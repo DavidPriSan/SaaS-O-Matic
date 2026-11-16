@@ -9,7 +9,7 @@ Cómo se ha diseñado, planificado y construido SaaS-O-Matic con IA (Claude Code
 | [00-analisis-requisitos.md](00-analisis-requisitos.md) | 1 · Planificación | Requisitos explícitos, **12 ambigüedades** del enunciado y la decisión tomada en cada una |
 | [specs/](specs/) | 1 · Spec-Driven Development | Reglas de negocio con ejemplos verificados, algoritmo fiscal con vectores, contrato de la API, modelo de datos y frontend |
 | [plans/00-roadmap.md](plans/00-roadmap.md) | 1 · Planificación | Fases con criterios de aceptación, plantilla de prompt por feature y checklist de revisión del código generado |
-| [architecture/](architecture/) | 2 · Arquitectura | Estructura y capas, estrategia de tests y **11 ADRs** (decisiones con alternativas descartadas) |
+| [architecture/](architecture/) | 2 · Arquitectura | Estructura y capas, estrategia de tests y **13 ADRs** (decisiones con alternativas descartadas) |
 | [../CLAUDE.md](../CLAUDE.md) | 2 · Directrices para la IA | Reglas permanentes: capas, dinero en céntimos, sin `any`, tamaño de ficheros, TDD, "si la spec es ambigua, pregunta" |
 | [vibe-log/](vibe-log/) | 3 · Vibe coding y control de calidad | Diario por sesión: prompt → propuesta de la IA → revisión → corrección |
 
@@ -27,8 +27,8 @@ Las reglas de `CLAUDE.md` no se quedaron en el papel: **ESLint las hace ejecutab
 | [06 · Simulador](vibe-log/06-phase4-simulator.md) | Slider en tiempo real, historial | Formato de miles sin aplicar a importes; diagnóstico por eliminación de un fallo que solo ocurría con cobertura en paralelo |
 | [07 · Divisas](vibe-log/07-phase5-currency.md) | API externa, caché, estados | **Mutation testing manual**: un test que faltaba habría permitido mostrar euros con etiqueta de dólares; feedback de usuario sobre la zona horaria |
 | [08 · Cierre](vibe-log/08-phase6-closing.md) | README, `npm run dev`, auditoría | **Auditoría con un agente independiente** (6 bugs reales y 1 falso positivo, todos verificados); prueba desde un clon limpio; **diagnóstico de procesos huérfanos** hasta la causa raíz (job objects de Windows) tras descartar una solución "de libro" que no funcionaba |
-
 | [09 · Docker](vibe-log/09-docker-deployment.md) | Despliegue con Docker Compose | Se descartaron los instaladores de sistema (ADR-012); validado primero en la CI y después en local (7/7 + no-root, cabeceras y límites); tamaño de imagen declarado como pendiente |
+| [10 · Revisión externa](vibe-log/10-external-review.md) | E2E con Playwright, extras como supuesto, "Ver más", migración `002` | **Un "fallo confirmado" por la IA era un artefacto de su propia captura**, y lo destapó el E2E. Se buscó el peor caso real (320 px) y se arregló; paginación keyset; bug al fallar la página siguiente; mutation check del contador `AUTOINCREMENT` |
 
 ## Retrospectiva: cómo se dirigió a la IA
 
@@ -37,6 +37,7 @@ Las reglas de `CLAUDE.md` no se quedaron en el papel: **ESLint las hace ejecutab
 3. **No aceptar el primer verde.** Prueba en vivo además de los tests (bug de tildes), mutation testing (fallback de divisa) y auditoría por un agente sin contexto (6 bugs).
 4. **No parchear síntomas.** Actualizar Node en vez de fijar versiones antiguas, Zod 4 en vez de ignorar un CVE, registrar los matchers bien en vez de bajar el paralelismo, rechazar los caracteres de control en vez de convertir un `CHECK` en 400.
 5. **Todo lo que hace la IA también se audita**: su informe de auditoría tuvo un falso positivo; su herramienta de escritura convirtió ` ` en un carácter invisible (lo cazó ESLint).
+6. **Las revisiones externas también se verifican.** De cinco recomendaciones, cuatro se aplicaron tal cual. La de responsive se reprodujo antes de arreglarla, y el fallo real resultó ser otro (vibe-log 10).
 
 ## Cómo leerlo
 Orden recomendado: `00-analisis` → `specs/` → `architecture/` → `plans/` → `vibe-log/` (por orden).

@@ -12,6 +12,7 @@ Ninguna fase empieza sin que la anterior cumpla sus criterios de aceptación.
 | **4. Front: detalle y simulador** | Cards, simulador, historial | Mover el slider recalcula al instante. Guardar persiste y refresca el historial ✅ |
 | **5. Divisas** | `currency/` | Cambiar de divisa convierte todos los importes. Con la API caída la app sigue en EUR y muestra un banner ✅ |
 | **6. Cierre** | README, revisión final, vibe-log | `npm install && npm run dev` levanta todo. Auditoría final de seguridad y calidad ✅ |
+| **7. Revisión externa** | E2E Playwright, extras como supuesto propio, paginación "Ver más", migración `002`, `audit` en `check` | E2E en verde a 320, 390 y 1440 px en la CI; `npm run check` = CI ✅ |
 
 ## Plantilla de prompt por feature
 

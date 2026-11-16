@@ -31,6 +31,7 @@ Formato corto: contexto → decisión → alternativas descartadas → consecuen
 
 ## ADR-007 · Validación en 3 capas
 Front (UX inmediata) → Zod en la API (autoridad) → `CHECK`/`UNIQUE` en SQLite (última defensa). La regla vive en `shared`, así que front y API no pueden contradecirse.
+- **Corrección tras la revisión externa**: la tercera capa estaba incompleta en `simulations` (plan, país y máximos sin `CHECK`). La migración `002` la completa. En `customers`, `country_code` sigue validado en BD solo por formato (el motivo está en la spec 04).
 
 ## ADR-010 · React 19 en lugar de React 18
 - **Contexto**: la spec original decía React 18. Al empezar la fase 3, la versión estable es la 19.3 y la 18 ya no tiene desarrollo activo.
@@ -41,7 +42,7 @@ Front (UX inmediata) → Zod en la API (autoridad) → `CHECK`/`UNIQUE` en SQLit
 - **Decisión**:
   - Job `quality` (Linux): `prettier --check`, ESLint con reglas *type-checked* (`--max-warnings 0`), typecheck y `npm audit --audit-level=moderate`.
   - Job `test` en matriz: Ubuntu con Node 22 (mínimo de `engines`), Ubuntu con Node 26 y **Windows** con Node 26 (valida el binario nativo de `better-sqlite3` y la instalación limpia con `npm ci`). Ejecuta tests con umbrales de cobertura y build de producción.
-  - `npm run check` reproduce lo mismo en local.
+  - `npm run check` reproduce lo mismo en local. Desde la revisión externa incluye también `npm audit` (antes solo estaba en la CI) y el E2E.
 - **Reglas de ESLint que hacen ejecutables las normas de `CLAUDE.md`**: `no-explicit-any`, `no-non-null-assertion`, `no-console`, `max-lines: 200`. En lugar de `max-lines-per-function` se usa `complexity: 10` (con factorías y JSX, contar líneas por función es mal indicador; la complejidad ciclomática no).
 - **Cobertura**: umbrales fijados **tras medir** (shared 96 % / 100 % ramas → umbral 95; API 97 % / 87 % → 90 / 80). En el front es solo informativa.
 - **Fuera de CI a propósito**: la API real de tipos de cambio (sería frágil; se simula) y la revisión visual. CD descartado: la prueba se evalúa en local y una API con SQLite necesita un host con disco persistente.
@@ -57,6 +58,17 @@ Front (UX inmediata) → Zod en la API (autoridad) → `CHECK`/`UNIQUE` en SQLit
 - **Verificación**: job `docker` en la CI que construye, arranca con `--wait` (healthchecks) y ejecuta `scripts/docker-smoke.sh` (web, enlaces directos, proxy, búsqueda, DNI, precio, **persistencia tras reiniciar**). El mismo script sirve en local.
 - **Puerto `4180` (configurable con `WEB_PORT`)**, no `8080`: el 8080 estaba ocupado por un servicio de Windows en el equipo de desarrollo, que lo compartía en silencio por IPv4 mientras Docker escuchaba por IPv6. La prueba de humo comprueba IPv4 e IPv6 por separado para detectarlo.
 - **Complemento**: `engine-strict=true` en `.npmrc`. Con un Node antiguo, `npm install` se detiene al principio con un mensaje claro en lugar de fallar de forma confusa más tarde.
+
+## ADR-013 · E2E con Playwright (un flujo, dos anchos)
+- **Contexto**: una revisión externa señaló un fallo responsive que ninguna suite podía ver: Testing Library corre en jsdom, que no maqueta, y la prueba de humo es HTTP.
+- **Decisión**: workspace `e2e/` con `@playwright/test` (aprobado explícitamente) y solo Chromium.
+  - Cubre **un** flujo de negocio a 390 y 1440 px, más un peor caso a 320 px (valores máximos, MXN).
+  - Corre contra el **build de producción** (`vite preview`, mismo proxy `/api`) y una **API real** con SQLite temporal.
+  - Usa puertos propios (3100/4173) para no chocar con `npm run dev`.
+  - La API de divisas se simula con `page.route`: determinista y sin red.
+- **Aserciones de maquetación**: `scrollWidth <= innerWidth` y que nada cruce el relleno de las tarjetas. Si falla, el mensaje nombra los elementos que sobresalen.
+- **Descartado**: Cypress (más pesado y otro runner); pruebas visuales por captura (frágiles entre sistemas operativos y fuentes); muchos E2E (la lógica ya la cubren 244 tests más rápidos).
+- **Lección (vibe-log 10)**: las capturas *headless* con `--window-size` no sirven para probar anchos de móvil, porque el navegador impone un ancho mínimo de ventana. Hay que usar un viewport real.
 
 ## ADR-008 · Runtime Node ≥ 22 (desarrollado sobre Node 26 LTS)
 - **Contexto**: Fastify 5 actual → `light-my-request@6.8` → `cookie@2`, que exige Node ≥ 22. Además, Node 20 está fuera de soporte desde abril de 2026.

@@ -43,7 +43,7 @@ Abre **http://localhost:4180** (si ese puerto está ocupado: `WEB_PORT=9000 dock
 ## Recorrido sugerido (5 minutos)
 
 1. **Buscador**: escribe `nebula` (sin tilde ni mayúsculas) → encuentra *Nébula Analytics*. Prueba también con un NIF parcial: `x-123`.
-2. **Simulador**: abre *Acme Ibérica S.L.* y lleva el slider a **15 usuarios** → 10 × 10 € + 5 × 8 € = **140 €** + 21 % IVA = **169,40 €** (el ejemplo del enunciado). El tramo activo se resalta en el desglose.
+2. **Simulador**: abre *Acme Ibérica S.L.* y lleva el slider a **15 usuarios** → 10 × 10 € + 5 × 8 € = **140 €** + 21 % IVA = **169,40 €** (el ejemplo del enunciado). El tramo activo se resalta en el desglose, que separa el **coste por usuarios** (el cálculo del enunciado) de los **extras por consumo**, marcados como *supuesto propio*.
 3. **Divisa**: cambia a **USD** en la cabecera → simulador, desglose e historial se convierten al instante. Debajo del total se indica el importe que se factura en EUR.
 4. **Historial**: pulsa **Guardar simulación** → aparece arriba del historial. Con **Cargar** se recupera cualquier simulación anterior en el simulador.
 5. **Alta con validación fiscal**: *Nuevo cliente* → con país España, `12345678A` se rechaza (letra de control incorrecta) y `12345678Z` se acepta como "DNI válido". También valida NIE (`X1234567L`) y CIF (`B12345674`). Si repites un NIF ya registrado, aunque sea con otro formato (`b-1234567-4`), la API responde 409 y el error aparece en el campo.
@@ -57,7 +57,8 @@ Abre **http://localhost:4180** (si ese puerto está ocupado: `WEB_PORT=9000 dock
 | `npm run dev:api` / `npm run dev:web` | Solo uno de los dos |
 | `npm run seed` | Carga los datos de ejemplo (no hace nada si ya hay clientes) |
 | `npm test` | Todos los tests (shared, API y web) |
-| `npm run check` | **Lo mismo que la CI**: formato, lint, typecheck, tests con umbrales de cobertura y build |
+| `npm run e2e` | Tests de navegador (Playwright) contra el build de producción y una API real, a 320, 390 y 1440 px. La primera vez: `npx -w @saas/e2e playwright install chromium` |
+| `npm run check` | **Lo mismo que la CI**: formato, lint, typecheck, `npm audit`, tests con umbrales de cobertura, build y E2E |
 | `npm run build` | Build de producción del frontend (`apps/web/dist`) |
 
 ## Configuración (API)
@@ -111,15 +112,16 @@ apps/web          React 19 + Vite + TanStack Query · organizado por features
 - **Una sola implementación del precio**: el simulador calcula en el navegador (sin red, al instante) con el **mismo** `computeQuote` que usa la API. El servidor siempre recalcula y es quien decide el importe guardado.
 - **Dinero en céntimos enteros** de principio a fin; la divisa solo se aplica al mostrar.
 - **Cada simulación guarda una copia de su precio** (tramos, IVA, plan, versión de tarifa): el historial no cambia aunque cambien las tarifas.
-- **Validación en 3 capas**: formulario (mismo esquema que la API) → Zod en la API → `CHECK`/`UNIQUE` en SQLite.
+- **Validación en 3 capas**: formulario (mismo esquema que la API) → Zod en la API → `CHECK`/`UNIQUE` en SQLite (en `simulations`: plan, país, máximos e importes coherentes, migración `002`).
 
 Más en [arquitectura](ai-workspace/architecture/01-structure.md) y en el [registro de decisiones](ai-workspace/architecture/02-decisions.md).
 
 ## Calidad
 
-- **212 tests**: dominio (ejemplos de la spec, vectores de NIF y CIF reales, invariantes), integración de la API sobre SQLite en memoria y flujos de UI con Testing Library.
+- **244 tests**: dominio (ejemplos de la spec, vectores de NIF y CIF reales, invariantes), integración de la API sobre SQLite en memoria (incluidas las migraciones) y flujos de UI con Testing Library.
+- **E2E con Playwright**: el flujo principal en un navegador real a 390 y 1440 px, más un peor caso a 320 px, comprobando que no haya scroll horizontal.
 - **Cobertura mínima** obligatoria: `shared` 95 %, API 90 %.
-- **CI en cada push y PR** (GitHub Actions): formato, ESLint con reglas que usan los tipos, typecheck, `npm audit`, tests + build en Ubuntu (Node 22 y 26) y Windows, y **despliegue Docker Compose** construido, arrancado y verificado con una prueba de humo.
+- **CI en cada push y PR** (GitHub Actions): formato, ESLint con reglas que usan los tipos, typecheck, `npm audit`, tests + build en Ubuntu (Node 22 y 26) y Windows, tests de navegador (Playwright) y **despliegue Docker Compose** construido, arrancado y verificado con una prueba de humo.
 
 ## Solución de problemas
 
