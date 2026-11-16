@@ -45,6 +45,8 @@ Cabecera global: logo y **selector de divisa**, presente en todas las vistas.
 ## 4. Historial
 Lista o tabla de simulaciones (fecha, usuarios, GB, llamadas, total), convertida a la divisa activa. Estado vacío con llamada a la acción.
 
+**Paginación (tras la revisión externa):** búsqueda e historial cargan 20 elementos y, si `nextCursor` no es `null`, muestran un botón **"Ver más"** que añade la página siguiente debajo (sin perder lo ya cargado). Mientras haya más, el contador indica que la lista no está completa.
+
 **Ampliaciones añadidas en la fase 4** (no estaban en la spec original):
 - Botón **"Cargar"** en cada simulación guardada: devuelve sus valores al simulador para retomar y ajustar una propuesta. Por eso el estado del simulador vive en la página de detalle y no en el componente.
 - Precio medio por usuario (base / usuarios) bajo la proyección, como ayuda comercial.

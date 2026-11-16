@@ -1,7 +1,17 @@
-import { computeQuote, type CountryCode, type CreateSimulationInput, type PlanId, type Simulation } from '@saas/shared';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  computeQuote,
+  type CountryCode,
+  type CreateSimulationInput,
+  type Page,
+  type PlanId,
+  type Simulation,
+} from '@saas/shared';
+import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { createSimulation, fetchSimulations, simulationKeys } from '../../api/simulations';
+import { FIRST_PAGE, flattenPages, nextPageParam } from '../../lib/pagination';
+
+type HistoryCache = InfiniteData<Page<Simulation>, string | null>;
 
 export type SimulatorInputs = Omit<CreateSimulationInput, 'customerId'>;
 
@@ -17,9 +27,12 @@ export function useSimulatorInputs(initial: SimulatorInputs = DEFAULT_INPUTS) {
 }
 
 export function useSimulations(customerId: number) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: simulationKeys.byCustomer(customerId),
-    queryFn: ({ signal }) => fetchSimulations(customerId, signal),
+    queryFn: ({ signal, pageParam }) => fetchSimulations(customerId, pageParam, signal),
+    initialPageParam: FIRST_PAGE,
+    getNextPageParam: nextPageParam,
+    select: flattenPages,
   });
 }
 
@@ -29,9 +42,11 @@ export function useCreateSimulation(customerId: number) {
     mutationFn: createSimulation,
     onSuccess: (simulation) => {
       const key = simulationKeys.byCustomer(customerId);
-      if (queryClient.getQueryData<Simulation[]>(key)) {
-        // The server returns the persisted row: prepend it instead of refetching the whole list.
-        queryClient.setQueryData<Simulation[]>(key, (current = []) => [simulation, ...current]);
+      const cached = queryClient.getQueryData<HistoryCache>(key);
+      if (cached) {
+        // The server returns the persisted row: prepend it instead of refetching every loaded page. Cursors stay
+        // valid because they point at the last item of each page, not at the first.
+        queryClient.setQueryData<HistoryCache>(key, prependToFirstPage(cached, simulation));
       } else {
         // No list loaded (still pending or failed): seeding [simulation] would hide the error and the older
         // history. Reload from the server instead.
@@ -39,6 +54,12 @@ export function useCreateSimulation(customerId: number) {
       }
     },
   });
+}
+
+function prependToFirstPage(cache: HistoryCache, simulation: Simulation): HistoryCache {
+  const [first, ...rest] = cache.pages;
+  const firstPage = first ?? { items: [], nextCursor: null };
+  return { ...cache, pages: [{ ...firstPage, items: [simulation, ...firstPage.items] }, ...rest] };
 }
 
 /**

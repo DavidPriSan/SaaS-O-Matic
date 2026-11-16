@@ -74,15 +74,15 @@ Todas las variables son opcionales y se validan al arrancar: un valor inválido 
 
 ## API
 
-Contrato completo (cuerpos, validaciones y errores) en [spec 03](ai-workspace/specs/03-api-contract.md). Importes siempre en **céntimos de EUR**.
+Contrato completo (cuerpos, validaciones y errores) en [spec 03](ai-workspace/specs/03-api-contract.md). Importes siempre en **céntimos de EUR**. Los listados se paginan **por cursor** (20 por página, máximo 50): se pide la siguiente con `?cursor=<nextCursor>` hasta que `nextCursor` sea `null`; en la interfaz, botón **"Ver más"**.
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | `POST` | `/customers` | Alta de cliente. `400` si un dato no es válido (con el motivo por campo), `409` si el NIF ya existe en ese país |
-| `GET` | `/customers?q=&limit=` | Búsqueda por nombre (sin distinguir mayúsculas ni tildes) o prefijo de NIF |
+| `GET` | `/customers?q=&limit=&cursor=` | Búsqueda por nombre (sin distinguir mayúsculas ni tildes) o prefijo de NIF. Paginada: `{ items, nextCursor }` |
 | `GET` | `/customers/:id` | Detalle (`404` si no existe) |
 | `POST` | `/simulations` | Registra una simulación. **El servidor calcula el precio**: no acepta importes, plan ni país del cliente |
-| `GET` | `/customers/:id/simulations` | Historial, de la más reciente a la más antigua |
+| `GET` | `/customers/:id/simulations?limit=&cursor=` | Historial, de la más reciente a la más antigua. Paginado igual |
 | `GET` | `/meta/pricing` | Catálogo: tramos, planes, excedentes y países con IVA |
 | `GET` | `/health` | Estado |
 

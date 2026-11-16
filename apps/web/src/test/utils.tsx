@@ -83,6 +83,9 @@ export function mockFetch(
   return requests;
 }
 
+/** A listing response (spec 03): `nextCursor` null means there is nothing more to load. */
+export const aPage = <T,>(items: T[], nextCursor: string | null = null) => ({ items, nextCursor });
+
 export const errorBody = (code: string, details?: Array<{ path: string; message: string }>) => ({
   error: { code, message: 'test', ...(details ? { details } : {}) },
 });

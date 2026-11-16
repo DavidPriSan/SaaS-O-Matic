@@ -2,6 +2,7 @@ import {
   simulationListResponseSchema,
   simulationSchema,
   type CreateSimulationInput,
+  type Page,
   type Simulation,
 } from '@saas/shared';
 import { apiRequest } from './http';
@@ -10,12 +11,13 @@ export const simulationKeys = {
   byCustomer: (customerId: number) => ['simulations', 'customer', customerId] as const,
 };
 
-export async function fetchSimulations(customerId: number, signal?: AbortSignal): Promise<Simulation[]> {
-  const { items } = await apiRequest(`/customers/${customerId}/simulations`, {
-    schema: simulationListResponseSchema,
-    signal,
-  });
-  return items;
+export function fetchSimulations(
+  customerId: number,
+  cursor: string | null,
+  signal?: AbortSignal,
+): Promise<Page<Simulation>> {
+  const query = cursor === null ? '' : `?${new URLSearchParams({ cursor })}`;
+  return apiRequest(`/customers/${customerId}/simulations${query}`, { schema: simulationListResponseSchema, signal });
 }
 
 /** Only usage figures are sent: plan, country and amounts are decided by the server. */

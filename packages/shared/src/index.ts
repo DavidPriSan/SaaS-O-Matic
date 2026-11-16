@@ -10,4 +10,5 @@ export * from './pricing/tiers';
 export * from './schemas/common';
 export * from './schemas/customer';
 export * from './schemas/errors';
+export * from './schemas/pagination';
 export * from './schemas/simulation';

@@ -1,4 +1,10 @@
-import { customerListResponseSchema, customerSchema, type CreateCustomerInput, type Customer } from '@saas/shared';
+import {
+  customerListResponseSchema,
+  customerSchema,
+  type CreateCustomerInput,
+  type Customer,
+  type Page,
+} from '@saas/shared';
 import { apiRequest } from './http';
 
 export const customerKeys = {
@@ -8,10 +14,12 @@ export const customerKeys = {
   detail: (id: number) => [...customerKeys.all, 'detail', id] as const,
 };
 
-export async function fetchCustomers(term: string, signal?: AbortSignal): Promise<Customer[]> {
-  const query = term === '' ? '' : `?${new URLSearchParams({ q: term })}`;
-  const { items } = await apiRequest(`/customers${query}`, { schema: customerListResponseSchema, signal });
-  return items;
+export function fetchCustomers(term: string, cursor: string | null, signal?: AbortSignal): Promise<Page<Customer>> {
+  const params = new URLSearchParams();
+  if (term !== '') params.set('q', term);
+  if (cursor !== null) params.set('cursor', cursor);
+  const query = params.toString() === '' ? '' : `?${params}`;
+  return apiRequest(`/customers${query}`, { schema: customerListResponseSchema, signal });
 }
 
 export function fetchCustomer(id: number, signal?: AbortSignal): Promise<Customer> {

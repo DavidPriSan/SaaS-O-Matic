@@ -1,5 +1,14 @@
-import { simulationSchema, type CountryCode, type PlanId, type Quote, type Simulation } from '@saas/shared';
+import {
+  simulationSchema,
+  type CountryCode,
+  type PageQuery,
+  type Page,
+  type PlanId,
+  type Quote,
+  type Simulation,
+} from '@saas/shared';
 import type { Db } from '../../db/connection';
+import { cursorParams, KEYSET_CONDITION, toPage, type CursorParams } from '../../db/pagination';
 
 export interface NewSimulation {
   customerId: number;
@@ -97,9 +106,11 @@ export function createSimulationsRepository(db: Db) {
     )
     RETURNING *`);
 
-  const listStmt = db.prepare<[number], SimulationRow>(
-    'SELECT * FROM simulations WHERE customer_id = ? ORDER BY created_at DESC, id DESC',
-  );
+  const listStmt = db.prepare<{ customerId: number } & CursorParams, SimulationRow>(`
+    SELECT * FROM simulations
+    WHERE customer_id = @customerId AND ${KEYSET_CONDITION}
+    ORDER BY created_at DESC, id DESC
+    LIMIT @fetchLimit`);
 
   return {
     insert(simulation: NewSimulation): Simulation {
@@ -108,8 +119,8 @@ export function createSimulationsRepository(db: Db) {
       return toSimulation(row);
     },
 
-    listByCustomer(customerId: number): Simulation[] {
-      return listStmt.all(customerId).map(toSimulation);
+    listByCustomer(customerId: number, { limit, cursor }: PageQuery): Page<Simulation> {
+      return toPage(listStmt.all({ customerId, ...cursorParams(limit, cursor) }), limit, toSimulation);
     },
   };
 }

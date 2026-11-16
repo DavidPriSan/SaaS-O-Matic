@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { pageQuerySchema, pageResponseSchema } from './pagination';
 import { COUNTRY_CODES } from '../catalog/countries';
 import { QUOTE_LIMITS, type Quote } from '../pricing/computeQuote';
 import { PLAN_IDS } from '../pricing/plans';
@@ -55,4 +56,7 @@ export const simulationSchema = z.object({
 
 export type Simulation = z.infer<typeof simulationSchema>;
 
-export const simulationListResponseSchema = z.object({ items: z.array(simulationSchema) });
+export const simulationListResponseSchema = pageResponseSchema(simulationSchema);
+
+/** GET /customers/:id/simulations query string. */
+export const listSimulationsQuerySchema = pageQuerySchema;

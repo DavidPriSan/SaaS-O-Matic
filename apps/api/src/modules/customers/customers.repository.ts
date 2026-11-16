@@ -1,5 +1,13 @@
-import { customerSchema, normalizeFiscalId, type Customer, type NewCustomer } from '@saas/shared';
+import {
+  customerSchema,
+  normalizeFiscalId,
+  type Customer,
+  type NewCustomer,
+  type Page,
+  type SearchCustomersQuery,
+} from '@saas/shared';
 import type { Db } from '../../db/connection';
+import { cursorParams, KEYSET_CONDITION, toPage, type CursorParams } from '../../db/pagination';
 import { normalizeSearchText } from '../../db/search';
 import { ConflictError } from '../../errors';
 
@@ -12,11 +20,6 @@ interface CustomerRow {
   country_code: string;
   plan: string;
   created_at: string;
-}
-
-interface SearchParams {
-  q?: string | undefined;
-  limit: number;
 }
 
 /** Rows are parsed with the shared schema: no unchecked casts from DB strings to domain unions. */
@@ -51,15 +54,18 @@ export function createCustomersRepository(db: Db) {
 
   // Name: case/accent-insensitive "contains". Tax ID: prefix on the normalized value. Always parameterized.
   const searchStmt = db.prepare<
-    { namePattern: string | null; taxIdPattern: string | null; limit: number },
+    { namePattern: string | null; taxIdPattern: string | null } & CursorParams,
     CustomerRow
   >(`
     SELECT * FROM customers
-    WHERE @namePattern IS NULL
-       OR search_normalize(company_name) LIKE @namePattern ESCAPE '\\'
-       OR tax_id LIKE @taxIdPattern ESCAPE '\\'
+    WHERE (
+        @namePattern IS NULL
+        OR search_normalize(company_name) LIKE @namePattern ESCAPE '\\'
+        OR tax_id LIKE @taxIdPattern ESCAPE '\\'
+      )
+      AND ${KEYSET_CONDITION}
     ORDER BY created_at DESC, id DESC
-    LIMIT @limit`);
+    LIMIT @fetchLimit`);
 
   return {
     insert(customer: NewCustomer): Customer {
@@ -82,16 +88,15 @@ export function createCustomersRepository(db: Db) {
       return row ? toCustomer(row) : undefined;
     },
 
-    search({ q, limit }: SearchParams): Customer[] {
+    search({ q, limit, cursor }: SearchCustomersQuery): Page<Customer> {
       const term = q?.trim() ?? '';
       const normalizedTaxId = normalizeFiscalId(term);
-      return searchStmt
-        .all({
-          namePattern: term === '' ? null : `%${escapeLike(normalizeSearchText(term))}%`,
-          taxIdPattern: normalizedTaxId === '' ? null : `${escapeLike(normalizedTaxId)}%`,
-          limit,
-        })
-        .map(toCustomer);
+      const rows = searchStmt.all({
+        namePattern: term === '' ? null : `%${escapeLike(normalizeSearchText(term))}%`,
+        taxIdPattern: normalizedTaxId === '' ? null : `${escapeLike(normalizedTaxId)}%`,
+        ...cursorParams(limit, cursor),
+      });
+      return toPage(rows, limit, toCustomer);
     },
   };
 }

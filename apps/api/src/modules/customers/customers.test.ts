@@ -144,6 +144,52 @@ describe('GET /customers (search)', () => {
     expect(await search(`?q=${encodeURIComponent("' OR 1=1 --")}`)).toEqual([]);
   });
 
+  const page = async (query: string) => {
+    const res = await ctx.app.inject({ method: 'GET', url: `/customers${query}` });
+    expect(res.statusCode).toBe(200);
+    const body = res.json<{ items: Array<{ companyName: string }>; nextCursor: string | null }>();
+    return { names: body.items.map((c) => c.companyName), nextCursor: body.nextCursor };
+  };
+  const after = (cursor: string | null) => encodeURIComponent(cursor ?? '');
+
+  it('pages with nextCursor until it is null (spec 03, Paginación)', async () => {
+    const first = await page('?limit=2');
+    expect(first.names).toEqual(['100% Cloud', 'Nébula Analytics']);
+    expect(first.nextCursor).toEqual(expect.any(String));
+
+    const second = await page(`?limit=2&cursor=${after(first.nextCursor)}`);
+    expect(second).toEqual({ names: ['Acme Ibérica S.L.'], nextCursor: null });
+  });
+
+  it('keeps the filter across pages and neither repeats nor skips when a customer is added meanwhile', async () => {
+    const first = await page('?q=a&limit=1');
+    expect(first.names).toEqual(['Nébula Analytics']);
+    await seedCustomers([validCustomer({ companyName: 'Zeta Analytics', taxId: '87654321X' })]);
+
+    const second = await page(`?q=a&limit=1&cursor=${after(first.nextCursor)}`);
+    expect(second).toEqual({ names: ['Acme Ibérica S.L.'], nextCursor: null });
+  });
+
+  it('breaks createdAt ties by id, so equal timestamps are not lost between pages', async () => {
+    ctx.db.prepare("UPDATE customers SET created_at = '2026-01-01T00:00:00.000Z'").run();
+    const names: string[] = [];
+    let cursor: string | null = null;
+    do {
+      const result: { names: string[]; nextCursor: string | null } = await page(
+        `?limit=1${cursor ? `&cursor=${after(cursor)}` : ''}`,
+      );
+      names.push(...result.names);
+      cursor = result.nextCursor;
+    } while (cursor);
+    expect(names).toEqual(['100% Cloud', 'Nébula Analytics', 'Acme Ibérica S.L.']);
+  });
+
+  it('rejects a malformed cursor with 400 on the cursor field', async () => {
+    const res = await ctx.app.inject({ method: 'GET', url: `/customers?cursor=${encodeURIComponent("x' OR 1=1")}` });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error.details).toEqual([{ path: 'cursor', message: 'INVALID_CURSOR' }]);
+  });
+
   it('honours the limit and rejects out-of-range values', async () => {
     expect(await search('?limit=1')).toHaveLength(1);
     const res = await ctx.app.inject({ method: 'GET', url: '/customers?limit=500' });

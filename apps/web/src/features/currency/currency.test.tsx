@@ -1,7 +1,15 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { EXCHANGE_RATES_URL } from '../../api/exchangeRates';
-import { aCustomer, aSimulation, mockFetch, ratesResponse, renderRoute, type MockResponse } from '../../test/utils';
+import {
+  aPage,
+  aCustomer,
+  aSimulation,
+  mockFetch,
+  ratesResponse,
+  renderRoute,
+  type MockResponse,
+} from '../../test/utils';
 import { readRatesCache, writeRatesCache } from './ratesCache';
 import { RATES_STALE_MS } from './useExchangeRates';
 
@@ -12,7 +20,7 @@ function mockApi(exchange?: ExchangeMock) {
   return mockFetch(
     ({ url }): MockResponse =>
       url.endsWith('/simulations')
-        ? { body: { items: [aSimulation({ id: 3, activeUsers: 15 })] } } // 169,40 €
+        ? { body: aPage([aSimulation({ id: 3, activeUsers: 15 })]) } // 169,40 €
         : { body: aCustomer() },
     exchange,
   );

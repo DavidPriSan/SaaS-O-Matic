@@ -19,7 +19,8 @@ afterEach(async () => {
 });
 
 const postSimulation = (payload: object) => ctx.app.inject({ method: 'POST', url: '/simulations', payload });
-const listSimulations = (id: number) => ctx.app.inject({ method: 'GET', url: `/customers/${id}/simulations` });
+const listSimulations = (id: number, query = '') =>
+  ctx.app.inject({ method: 'GET', url: `/customers/${id}/simulations${query}` });
 
 describe('POST /simulations', () => {
   it('computes the quote server-side with the customer plan and country (spec 01, example 7)', async () => {
@@ -91,7 +92,7 @@ describe('POST /simulations', () => {
 
 describe('GET /customers/:id/simulations', () => {
   it('returns an empty list for a customer without simulations', async () => {
-    expect((await listSimulations(customerId)).json()).toEqual({ items: [] });
+    expect((await listSimulations(customerId)).json()).toEqual({ items: [], nextCursor: null });
   });
 
   it('lists simulations newest first', async () => {
@@ -101,6 +102,26 @@ describe('GET /customers/:id/simulations', () => {
     const { items } = (await listSimulations(customerId)).json();
 
     expect(items.map((s: { activeUsers: number }) => s.activeUsers)).toEqual([75, 25, 5]);
+  });
+
+  it('pages the history with limit and nextCursor', async () => {
+    for (const activeUsers of [5, 25, 75]) {
+      await postSimulation({ customerId, activeUsers, storageGb: 0, apiCalls: 0 });
+    }
+    const users = (items: Array<{ activeUsers: number }>) => items.map((s) => s.activeUsers);
+
+    const first = (await listSimulations(customerId, '?limit=2')).json();
+    expect(users(first.items)).toEqual([75, 25]);
+    const second = (
+      await listSimulations(customerId, `?limit=2&cursor=${encodeURIComponent(first.nextCursor)}`)
+    ).json();
+    expect(users(second.items)).toEqual([5]);
+    expect(second.nextCursor).toBeNull();
+  });
+
+  it('rejects an out-of-range limit or a malformed cursor with 400', async () => {
+    expect((await listSimulations(customerId, '?limit=51')).statusCode).toBe(400);
+    expect((await listSimulations(customerId, '?cursor=nope')).statusCode).toBe(400);
   });
 
   it('returns 404 for an unknown customer', async () => {

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { describeError } from '../../api/errors';
 import { ButtonLink } from '../../components/Button';
+import { LoadMore } from '../../components/LoadMore';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState, ErrorState, SkeletonGrid } from '../../components/StatusViews';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
@@ -48,21 +49,32 @@ export function SearchPage() {
           onChange={(event) => setTerm(event.target.value)}
           autoComplete="off"
         />
-        {search.isFetching && !search.isPending && <span className={styles.fetching}>Buscando…</span>}
+        {search.isFetching && !search.isPending && !search.isFetchingNextPage && (
+          <span className={styles.fetching}>Buscando…</span>
+        )}
       </div>
 
       {search.isPending ? (
         <SkeletonGrid />
-      ) : search.isError ? (
+      ) : search.isError && !search.isFetchNextPageError ? (
         <ErrorState message={describeError(search.error)} onRetry={() => void search.refetch()} />
       ) : (
-        <Results customers={search.data} term={debouncedTerm} />
+        <>
+          <Results customers={search.data} term={debouncedTerm} hasMore={search.hasNextPage} />
+          {search.hasNextPage && (
+            <LoadMore
+              onLoadMore={() => void search.fetchNextPage()}
+              loading={search.isFetchingNextPage}
+              failed={search.isFetchNextPageError}
+            />
+          )}
+        </>
       )}
     </>
   );
 }
 
-function Results({ customers, term }: { customers: Customer[]; term: string }) {
+function Results({ customers, term, hasMore }: { customers: Customer[]; term: string; hasMore: boolean }) {
   if (customers.length === 0) {
     return term ? (
       <EmptyState
@@ -80,9 +92,7 @@ function Results({ customers, term }: { customers: Customer[]; term: string }) {
 
   return (
     <section aria-label="Resultados">
-      <p className={styles.count}>
-        {term ? `${customers.length} resultado(s)` : `Últimos ${customers.length} clientes registrados`}
-      </p>
+      <p className={styles.count}>{resultsCount(customers.length, term, hasMore)}</p>
       <ul className={styles.grid}>
         {customers.map((customer) => (
           <li key={customer.id}>
@@ -92,4 +102,10 @@ function Results({ customers, term }: { customers: Customer[]; term: string }) {
       </ul>
     </section>
   );
+}
+
+/** While more pages exist, the count says the list is incomplete (spec 05). */
+function resultsCount(count: number, term: string, hasMore: boolean): string {
+  if (!hasMore) return term ? `${count} resultado(s)` : `Últimos ${count} clientes registrados`;
+  return term ? `Mostrando ${count} resultado(s); hay más` : `Últimos ${count} clientes registrados; hay más`;
 }

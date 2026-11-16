@@ -1,4 +1,4 @@
-import type { Customer, NewCustomer, SearchCustomersQuery } from '@saas/shared';
+import type { Customer, NewCustomer, Page, SearchCustomersQuery } from '@saas/shared';
 import { NotFoundError } from '../../errors';
 import type { CustomersRepository } from './customers.repository';
 
@@ -14,7 +14,7 @@ export function createCustomersService(customers: CustomersRepository) {
       return customer;
     },
 
-    search(query: SearchCustomersQuery): Customer[] {
+    search(query: SearchCustomersQuery): Page<Customer> {
       return customers.search(query);
     },
   };

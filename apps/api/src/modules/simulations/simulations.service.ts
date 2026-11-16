@@ -1,4 +1,11 @@
-import { computeQuote, type CreateSimulationInput, type Customer, type Simulation } from '@saas/shared';
+import {
+  computeQuote,
+  type CreateSimulationInput,
+  type Customer,
+  type Page,
+  type PageQuery,
+  type Simulation,
+} from '@saas/shared';
 import { NotFoundError } from '../../errors';
 import type { CustomersRepository } from '../customers/customers.repository';
 import type { SimulationsRepository } from './simulations.repository';
@@ -29,9 +36,9 @@ export function createSimulationsService({ customers, simulations }: Deps) {
       return simulations.insert({ ...input, plan, countryCode, quote });
     },
 
-    listByCustomer(customerId: number): Simulation[] {
+    listByCustomer(customerId: number, page: PageQuery): Page<Simulation> {
       requireCustomer(customerId);
-      return simulations.listByCustomer(customerId);
+      return simulations.listByCustomer(customerId, page);
     },
   };
 }

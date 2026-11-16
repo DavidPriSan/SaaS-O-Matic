@@ -1,4 +1,4 @@
-import { createSimulationSchema, idParamSchema } from '@saas/shared';
+import { createSimulationSchema, idParamSchema, listSimulationsQuerySchema } from '@saas/shared';
 import type { FastifyInstance } from 'fastify';
 import type { SimulationsService } from './simulations.service';
 
@@ -10,6 +10,7 @@ export function registerSimulationRoutes(app: FastifyInstance, service: Simulati
 
   app.get('/customers/:id/simulations', (request, reply) => {
     const { id } = idParamSchema.parse(request.params);
-    return reply.send({ items: service.listByCustomer(id) });
+    const page = listSimulationsQuerySchema.parse(request.query);
+    return reply.send(service.listByCustomer(id, page));
   });
 }

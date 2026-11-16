@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { pageQuerySchema, pageResponseSchema } from './pagination';
 import { COUNTRY_CODES } from '../catalog/countries';
 import { FISCAL_ID_TYPES } from '../fiscal-id/types';
 import { validateFiscalId } from '../fiscal-id/validateFiscalId';
@@ -45,14 +46,13 @@ export const customerSchema = z.object({
 
 export type Customer = z.infer<typeof customerSchema>;
 
-export const customerListResponseSchema = z.object({ items: z.array(customerSchema) });
+export const customerListResponseSchema = pageResponseSchema(customerSchema);
 
 export const SEARCH_QUERY_MAX_LENGTH = 100;
 
 /** GET /customers query string. */
-export const searchCustomersQuerySchema = z.object({
+export const searchCustomersQuerySchema = pageQuerySchema.extend({
   q: z.string().trim().max(SEARCH_QUERY_MAX_LENGTH).optional(),
-  limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 
 export type SearchCustomersQuery = z.infer<typeof searchCustomersQuerySchema>;

@@ -1,14 +1,14 @@
 import type { Simulation } from '@saas/shared';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { aCustomer, aSimulation, mockFetch, renderRoute, type MockResponse } from '../../test/utils';
+import { aPage, aCustomer, aSimulation, mockFetch, renderRoute, type MockResponse } from '../../test/utils';
 
 // Default customer: plan "pro", Spain (21 % VAT).
 function mockApi(history: Simulation[] = [], onPost?: (body: unknown) => MockResponse) {
   return mockFetch(({ url, method, body }) => {
     if (method === 'POST')
       return onPost ? onPost(body) : { status: 201, body: aSimulation({ id: 99, ...(body as object) }) };
-    if (url.endsWith('/simulations')) return { body: { items: history } };
+    if (url.endsWith('/simulations')) return { body: aPage(history) };
     return { body: aCustomer() };
   });
 }
@@ -118,7 +118,7 @@ describe('Simulator', () => {
       if (method === 'POST') return { status: 201, body: aSimulation({ id: 99, ...(body as object) }) };
       if (url.endsWith('/simulations')) {
         historyCalls += 1;
-        return historyCalls === 1 ? { status: 503, body: {} } : { body: { items: [aSimulation({ id: 1 })] } };
+        return historyCalls === 1 ? { status: 503, body: {} } : { body: aPage([aSimulation({ id: 1 })]) };
       }
       return { body: aCustomer() };
     });
@@ -129,6 +129,27 @@ describe('Simulator', () => {
 
     // The history is reloaded from the server instead of being replaced by [newSimulation].
     await waitFor(() => expect(historyCalls).toBe(2));
+  });
+
+  it('loads older simulations with «Ver más» below the ones already shown', async () => {
+    mockFetch(({ url }) => {
+      if (url.includes('/simulations?cursor=')) return { body: aPage([aSimulation({ id: 1, activeUsers: 5 })]) };
+      if (url.endsWith('/simulations')) {
+        return { body: aPage([aSimulation({ id: 2, activeUsers: 15 })], '2026-11-16T10:00:00.000Z_2') };
+      }
+      return { body: aCustomer() };
+    });
+    const { user } = await openCustomer();
+    await within(history()).findByText(/^15 usuarios/);
+    // "+": more pages exist, so the count is what is loaded, not the total.
+    expect(within(history()).getByRole('heading')).toHaveTextContent('Historial de simulaciones (1+)');
+
+    await user.click(within(history()).getByRole('button', { name: 'Ver más' }));
+
+    expect(await within(history()).findByText(/^5 usuarios/)).toBeInTheDocument();
+    expect(within(history()).getByText(/^15 usuarios/)).toBeInTheDocument();
+    expect(within(history()).getByRole('heading')).toHaveTextContent('Historial de simulaciones (2)');
+    expect(within(history()).queryByRole('button', { name: 'Ver más' })).not.toBeInTheDocument();
   });
 
   it('loads a saved simulation back into the simulator', async () => {

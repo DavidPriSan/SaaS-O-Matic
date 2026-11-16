@@ -14,7 +14,7 @@ export function registerCustomerRoutes(app: FastifyInstance, service: CustomersS
 
   app.get('/customers', (request, reply) => {
     const query = searchCustomersQuerySchema.parse(request.query);
-    return reply.send({ items: service.search(query) });
+    return reply.send(service.search(query));
   });
 
   app.get('/customers/:id', (request, reply) => {

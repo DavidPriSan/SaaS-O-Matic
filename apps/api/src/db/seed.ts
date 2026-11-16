@@ -90,7 +90,7 @@ const simulationsService = createSimulationsService({
   simulations: createSimulationsRepository(db),
 });
 
-if (customersService.search({ limit: 1 }).length > 0) {
+if (customersService.search({ limit: 1 }).items.length > 0) {
   console.info('Seed skipped: the database already contains customers.');
 } else {
   // Going through schemas + services keeps seed data subject to the same rules as the API.

@@ -1,12 +1,12 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { aCustomer, errorBody, mockFetch, renderRoute } from '../../test/utils';
+import { aPage, aCustomer, errorBody, mockFetch, renderRoute } from '../../test/utils';
 
 describe('CustomerDetailPage', () => {
   it('shows the customer data card', async () => {
     mockFetch(({ url }) =>
       url.endsWith('/simulations')
-        ? { body: { items: [] } }
+        ? { body: aPage([]) }
         : { body: aCustomer({ plan: 'enterprise', countryCode: 'DE' }) },
     );
     renderRoute('/customers/1');

@@ -1,6 +1,7 @@
 import type { Simulation } from '@saas/shared';
 import { describeError } from '../../api/errors';
 import { Button } from '../../components/Button';
+import { LoadMore } from '../../components/LoadMore';
 import { EmptyState, ErrorState, SkeletonGrid } from '../../components/StatusViews';
 import { formatDateTime, formatNumber } from '../../lib/format';
 import { useMoneyFormatter } from '../currency/useMoneyFormatter';
@@ -20,12 +21,13 @@ export function SimulationHistory({ customerId, onLoad }: SimulationHistoryProps
       <h2 id="history-title" className={styles.title}>
         Historial de simulaciones
         {simulations.data && simulations.data.length > 0 && (
-          <span className={styles.count}> ({simulations.data.length})</span>
+          // "+" while older pages exist: the count is what is loaded, not the total.
+          <span className={styles.count}>{` (${simulations.data.length}${simulations.hasNextPage ? '+' : ''})`}</span>
         )}
       </h2>
       {simulations.isPending ? (
         <SkeletonGrid count={2} />
-      ) : simulations.isError ? (
+      ) : simulations.isError && !simulations.isFetchNextPageError ? (
         <ErrorState message={describeError(simulations.error)} onRetry={() => void simulations.refetch()} />
       ) : simulations.data.length === 0 ? (
         <EmptyState
@@ -33,11 +35,20 @@ export function SimulationHistory({ customerId, onLoad }: SimulationHistoryProps
           description="Ajusta el simulador y pulsa «Guardar simulación» para registrar una propuesta."
         />
       ) : (
-        <ol className={styles.list}>
-          {simulations.data.map((simulation) => (
-            <HistoryItem key={simulation.id} simulation={simulation} onLoad={onLoad} />
-          ))}
-        </ol>
+        <>
+          <ol className={styles.list}>
+            {simulations.data.map((simulation) => (
+              <HistoryItem key={simulation.id} simulation={simulation} onLoad={onLoad} />
+            ))}
+          </ol>
+          {simulations.hasNextPage && (
+            <LoadMore
+              onLoadMore={() => void simulations.fetchNextPage()}
+              loading={simulations.isFetchingNextPage}
+              failed={simulations.isFetchNextPageError}
+            />
+          )}
+        </>
       )}
     </section>
   );

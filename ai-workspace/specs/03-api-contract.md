@@ -45,13 +45,13 @@
 ```
 Errores: 400, 409.
 
-## `GET /customers?q=&limit=`
+## `GET /customers?q=&limit=&cursor=`
 - `q` (opcional, máximo 100 caracteres): búsqueda que no distingue mayúsculas **ni tildes** en `companyName` (contiene; "nebula" encuentra "Nébula") **o** en `taxId` (prefijo, comparado con `q` normalizado).
 - Se escapan los comodines `%` y `_` de LIKE. Las consultas van **siempre parametrizadas**.
-- `limit`: 1–50, por defecto 20. Orden: `createdAt DESC`.
+- `limit` y `cursor`: ver **Paginación**. Orden: `createdAt DESC` (desempate por `id DESC`).
 - Sin `q` → últimos clientes registrados (alimenta el dashboard).
 
-**200** → `{ "items": Customer[] }`
+**200** → `{ "items": Customer[], "nextCursor": string | null }`
 
 ## `GET /customers/:id`
 **200** → `Customer` · **404**
@@ -74,8 +74,14 @@ Errores: 400, 409.
 ```
 Errores: 400, 404 (cliente inexistente).
 
-## `GET /customers/:id/simulations`
-**200** → `{ "items": Simulation[] }` ordenado por `createdAt DESC` · **404** si el cliente no existe.
+## `GET /customers/:id/simulations?limit=&cursor=`
+**200** → `{ "items": Simulation[], "nextCursor": string | null }` ordenado por `createdAt DESC` (desempate por `id DESC`) · **404** si el cliente no existe. Paginado igual que la búsqueda.
+
+## Paginación (listados)
+- `limit`: 1–50, por defecto 20.
+- **Keyset por cursor**, no `offset`: `nextCursor` identifica el último elemento devuelto (`createdAt` + `id`) y la página siguiente se pide con `?cursor=<nextCursor>` (y los mismos filtros). Si se insertan filas mientras se pagina, no hay duplicados ni saltos (con `offset` los habría).
+- `nextCursor: null` → no hay más resultados.
+- El cursor es **opaco** para el cliente: debe reenviarlo tal cual, no construirlo. Un cursor mal formado → **400** (`VALIDATION_ERROR`, campo `cursor`).
 
 ## `GET /meta/pricing`
 Catálogo para pintar selectores y tablas sin duplicar constantes en el front:
