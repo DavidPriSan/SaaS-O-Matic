@@ -7,7 +7,13 @@ import { PLAN_IDS } from '../pricing/plans';
 /** POST /customers body (spec 03). Output has the normalized taxId and its detected type. */
 export const createCustomerSchema = z
   .strictObject({
-    companyName: z.string().trim().min(2).max(120),
+    // No control characters: SQLite length() stops at NUL, so they would bypass min/max and hit the DB CHECK.
+    companyName: z
+      .string()
+      .trim()
+      .min(2)
+      .max(120)
+      .regex(/^\P{Cc}*$/u),
     taxId: z.string().max(32),
     // Normalize first, then validate the format (in Zod 4 a format check runs before chained trims).
     email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
@@ -41,9 +47,11 @@ export type Customer = z.infer<typeof customerSchema>;
 
 export const customerListResponseSchema = z.object({ items: z.array(customerSchema) });
 
+export const SEARCH_QUERY_MAX_LENGTH = 100;
+
 /** GET /customers query string. */
 export const searchCustomersQuerySchema = z.object({
-  q: z.string().trim().max(100).optional(),
+  q: z.string().trim().max(SEARCH_QUERY_MAX_LENGTH).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 

@@ -1,5 +1,5 @@
 import type { Simulation } from '@saas/shared';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { aCustomer, aSimulation, mockFetch, renderRoute, type MockResponse } from '../../test/utils';
 
@@ -93,6 +93,25 @@ describe('Simulator', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo guardar');
     expect(usersInput()).toHaveValue(42);
+  });
+
+  it('does not hide a failed history load behind a just-saved simulation (audit finding)', async () => {
+    let historyCalls = 0;
+    mockFetch(({ url, method, body }) => {
+      if (method === 'POST') return { status: 201, body: aSimulation({ id: 99, ...(body as object) }) };
+      if (url.endsWith('/simulations')) {
+        historyCalls += 1;
+        return historyCalls === 1 ? { status: 503, body: {} } : { body: { items: [aSimulation({ id: 1 })] } };
+      }
+      return { body: aCustomer() };
+    });
+    const { user } = await openCustomer();
+    await within(history()).findByRole('button', { name: 'Reintentar' });
+
+    await user.click(screen.getByRole('button', { name: 'Guardar simulación' }));
+
+    // The history is reloaded from the server instead of being replaced by [newSimulation].
+    await waitFor(() => expect(historyCalls).toBe(2));
   });
 
   it('loads a saved simulation back into the simulator', async () => {

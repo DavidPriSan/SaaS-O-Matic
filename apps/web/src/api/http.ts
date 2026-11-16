@@ -72,6 +72,6 @@ function toApiError(status: number, payload: unknown): ApiError {
     const { code, message, details } = parsed.data.error;
     return new ApiError(status, code, message, details ?? []);
   }
-  // No envelope: the dev proxy could not reach the API (or something in between failed).
-  return new ApiError(status, status >= 500 ? 'NETWORK_ERROR' : 'INTERNAL_ERROR', `HTTP ${status}`);
+  // No envelope: 5xx → the dev proxy could not reach the API; 4xx → something other than our API answered.
+  return new ApiError(status, status >= 500 ? 'NETWORK_ERROR' : 'INVALID_RESPONSE', `HTTP ${status}`);
 }

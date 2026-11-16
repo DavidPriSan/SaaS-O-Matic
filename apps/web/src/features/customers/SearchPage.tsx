@@ -1,4 +1,4 @@
-import type { Customer } from '@saas/shared';
+import { SEARCH_QUERY_MAX_LENGTH, type Customer } from '@saas/shared';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { describeError } from '../../api/errors';
@@ -14,7 +14,8 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 export function SearchPage() {
   const [params, setParams] = useSearchParams();
-  const [term, setTerm] = useState(() => params.get('q') ?? '');
+  // A hand-edited ?q= could exceed what the API accepts: clamp it like the input does.
+  const [term, setTerm] = useState(() => (params.get('q') ?? '').slice(0, SEARCH_QUERY_MAX_LENGTH));
   const debouncedTerm = useDebouncedValue(term.trim(), SEARCH_DEBOUNCE_MS);
   const search = useCustomerSearch(debouncedTerm);
 
@@ -43,6 +44,7 @@ export function SearchPage() {
           className={styles.searchInput}
           placeholder="Buscar por empresa o NIF/CIF…"
           value={term}
+          maxLength={SEARCH_QUERY_MAX_LENGTH}
           onChange={(event) => setTerm(event.target.value)}
           autoComplete="off"
         />

@@ -70,6 +70,8 @@ describe('NewCustomerPage', () => {
     expect(await screen.findByText(/Ya existe un cliente con este identificador/)).toBeInTheDocument();
     await user.type(screen.getByLabelText('Identificador fiscal'), '{backspace}4');
     expect(screen.queryByText(/Ya existe un cliente/)).not.toBeInTheDocument();
+    // Audit finding: clearing the field error must not surface a misleading generic banner instead.
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('shows a general message when the API is unreachable', async () => {

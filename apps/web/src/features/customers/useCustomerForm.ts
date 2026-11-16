@@ -87,7 +87,10 @@ export function useCustomerForm(onCreated: (customer: Customer) => void) {
     });
   }
 
-  const hasApiFieldErrors = Object.keys(apiFieldErrors).length > 0;
+  // Derived from the error itself, not from the field-error state: once the user edits the field and its
+  // inline message clears, a field-level error must not resurface as a misleading generic banner.
+  const errorMapsToFields =
+    mutation.isError && Object.keys(serverErrors(mutation.error, values.countryCode)).length > 0;
 
   return {
     values,
@@ -98,6 +101,6 @@ export function useCustomerForm(onCreated: (customer: Customer) => void) {
     taxIdSuccess: taxIdCheck.valid ? `${TAX_ID_TYPE_LABELS[taxIdCheck.type]} válido` : undefined,
     submit,
     isSubmitting: mutation.isPending,
-    generalError: mutation.isError && !hasApiFieldErrors ? describeError(mutation.error) : undefined,
+    generalError: mutation.isError && !errorMapsToFields ? describeError(mutation.error) : undefined,
   };
 }

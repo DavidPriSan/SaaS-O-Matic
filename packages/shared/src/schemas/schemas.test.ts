@@ -39,6 +39,19 @@ describe('createCustomerSchema', () => {
     expect(createCustomerSchema.safeParse({ ...validCustomer, [field]: value }).success).toBe(false);
   });
 
+  it.each(['\u0000\u0000abc', 'Acme\u0007 S.L.', 'Acme\nS.L.'])(
+    'rejects control characters in companyName: %j',
+    (name) => {
+      expect(createCustomerSchema.safeParse({ ...validCustomer, companyName: name }).success).toBe(false);
+    },
+  );
+
+  it('still accepts accents, ñ, symbols and inner spaces in companyName', () => {
+    expect(
+      createCustomerSchema.safeParse({ ...validCustomer, companyName: 'Nébula & Peña, S.L. (100%)' }).success,
+    ).toBe(true);
+  });
+
   it('rejects unknown fields (strict contract)', () => {
     expect(createCustomerSchema.safeParse({ ...validCustomer, isAdmin: true }).success).toBe(false);
   });
@@ -80,9 +93,11 @@ describe('searchCustomersQuerySchema', () => {
 });
 
 describe('idParamSchema', () => {
-  it('coerces positive integer ids from the URL', () => {
+  it('parses canonical positive integer ids from the URL', () => {
     expect(idParamSchema.parse({ id: '42' })).toEqual({ id: 42 });
-    expect(idParamSchema.safeParse({ id: 'abc' }).success).toBe(false);
-    expect(idParamSchema.safeParse({ id: '-1' }).success).toBe(false);
+  });
+
+  it.each(['abc', '-1', '0', '0x1', '1e0', ' 1', '01', '1.0', '99999999999999999'])('rejects the id %j', (id) => {
+    expect(idParamSchema.safeParse({ id }).success).toBe(false);
   });
 });

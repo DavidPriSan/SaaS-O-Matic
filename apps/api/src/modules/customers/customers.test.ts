@@ -82,6 +82,14 @@ describe('POST /customers', () => {
     expect(res.json().error.code).toBe('VALIDATION_ERROR');
   });
 
+  it('rejects control characters in the company name with 400, not a DB CHECK 500 (audit finding)', async () => {
+    // SQLite length() stops at NUL: Zod saw 5 chars, the CHECK saw 0 → previously an unhandled 500.
+    const res = await postCustomer(validCustomer({ companyName: '\u0000\u0000abc' }));
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error.details[0].path).toBe('companyName');
+  });
+
   it('returns the error envelope for malformed JSON', async () => {
     const res = await ctx.app.inject({
       method: 'POST',
@@ -155,5 +163,10 @@ describe('GET /customers/:id', () => {
   it('returns 404 for an unknown id and 400 for a non-numeric one', async () => {
     expect((await ctx.app.inject({ method: 'GET', url: '/customers/999' })).statusCode).toBe(404);
     expect((await ctx.app.inject({ method: 'GET', url: '/customers/abc' })).statusCode).toBe(400);
+  });
+
+  it.each(['0x1', '1e0', '%201', '01', '1.0'])('rejects the non-canonical id %s (audit finding)', async (id) => {
+    await postCustomer(validCustomer());
+    expect((await ctx.app.inject({ method: 'GET', url: `/customers/${id}` })).statusCode).toBe(400);
   });
 });

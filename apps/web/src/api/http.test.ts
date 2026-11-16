@@ -33,6 +33,12 @@ describe('apiRequest', () => {
     await expect(apiRequest('/x', { schema: customerSchema })).rejects.toMatchObject({ code: 'NETWORK_ERROR' });
   });
 
+  it('reports INVALID_RESPONSE for a 4xx without the API envelope (audit finding)', async () => {
+    mockFetch(() => ({ status: 404, body: '<html>Not Found</html>' }));
+
+    await expect(apiRequest('/x', { schema: customerSchema })).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+  });
+
   it('reports INVALID_RESPONSE when a 200 does not match the contract', async () => {
     mockFetch(() => ({ body: { unexpected: true } }));
 

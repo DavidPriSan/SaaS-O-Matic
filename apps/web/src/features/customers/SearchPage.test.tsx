@@ -33,6 +33,15 @@ describe('SearchPage', () => {
     expect(router.state.location.search).toBe('?q=nebula');
   });
 
+  it('never sends a query longer than the API accepts (audit finding)', async () => {
+    const requests = mockFetch(() => ({ body: { items: [] } }));
+    renderRoute(`/?q=${'x'.repeat(150)}`);
+
+    expect(await screen.findByRole('searchbox')).toHaveAttribute('maxLength', '100');
+    await screen.findByText(/Sin resultados/);
+    expect(new URL(requests.at(-1)?.url ?? '', 'http://x').searchParams.get('q')).toHaveLength(100);
+  });
+
   it('shows a specific empty state when nothing matches', async () => {
     mockFetch(() => ({ body: { items: [] } }));
     renderRoute('/?q=zzz');

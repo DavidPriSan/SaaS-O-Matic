@@ -28,11 +28,15 @@ export function useCreateSimulation(customerId: number) {
   return useMutation({
     mutationFn: createSimulation,
     onSuccess: (simulation) => {
-      // The server returns the persisted row: prepend it instead of refetching the whole list.
-      queryClient.setQueryData<Simulation[]>(simulationKeys.byCustomer(customerId), (current) => [
-        simulation,
-        ...(current ?? []),
-      ]);
+      const key = simulationKeys.byCustomer(customerId);
+      if (queryClient.getQueryData<Simulation[]>(key)) {
+        // The server returns the persisted row: prepend it instead of refetching the whole list.
+        queryClient.setQueryData<Simulation[]>(key, (current = []) => [simulation, ...current]);
+      } else {
+        // No list loaded (still pending or failed): seeding [simulation] would hide the error and the older
+        // history. Reload from the server instead.
+        void queryClient.invalidateQueries({ queryKey: key });
+      }
     },
   });
 }

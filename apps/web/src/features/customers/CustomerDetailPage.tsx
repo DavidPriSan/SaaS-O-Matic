@@ -1,4 +1,4 @@
-import type { Customer } from '@saas/shared';
+import { idSchema, type Customer } from '@saas/shared';
 import { useParams } from 'react-router';
 import { describeError } from '../../api/errors';
 import { ApiError } from '../../api/http';
@@ -15,9 +15,10 @@ import { useCustomer } from './hooks';
 
 const BACK = { to: '/', label: 'Volver a clientes' };
 
+/** Same rule as the API (shared schema): "/customers/0x10" must not open customer 16. */
 function parseId(raw: string | undefined): number | null {
-  const id = Number(raw);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
+  const parsed = idSchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
 }
 
 export function CustomerDetailPage() {
