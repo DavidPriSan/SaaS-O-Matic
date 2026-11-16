@@ -3,7 +3,9 @@
 #   docker compose up -d --build --wait && bash scripts/docker-smoke.sh
 set -euo pipefail
 
-BASE="${BASE_URL:-http://localhost:8080}"
+PORT="${WEB_PORT:-4180}"
+# Explicit IPv4: `localhost` may resolve to ::1 for curl but to 127.0.0.1 for a browser (or vice versa).
+BASE="${BASE_URL:-http://127.0.0.1:$PORT}"
 failures=0
 
 pass() { printf '  \033[32m✓\033[0m %s\n' "$1"; }
@@ -19,6 +21,18 @@ status=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/")
 
 expect_contains "web: SPA deep link /customers/1 falls back to index.html" \
   "$(curl -s "$BASE/customers/1")" "<title>SaaS-O-Matic</title>"
+
+# On Windows another program can silently share the port on the other IP family: the browser then lands on it
+# while IPv4-only (or IPv6-only) checks pass. Both families must serve THIS app when they answer at all.
+for family in "127.0.0.1" "[::1]"; do
+  body=$(curl -s -g --max-time 3 "http://$family:$PORT/" || true)
+  if [[ -z "$body" ]]; then
+    pass "port $PORT on $family: not listening (fine)"
+  else
+    expect_contains "port $PORT on $family serves this app (no other server sharing the port)" "$body" \
+      "<title>SaaS-O-Matic</title>"
+  fi
+done
 
 expect_contains "api via nginx proxy: /api/health" "$(curl -s "$BASE/api/health")" '"status":"ok"'
 

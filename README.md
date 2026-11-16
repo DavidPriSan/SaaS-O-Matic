@@ -31,7 +31,7 @@ cd SaaS-O-Matic
 docker compose up --build
 ```
 
-Abre **http://localhost:8080**. Es el build de producción: nginx sirve el frontend y hace de proxy de `/api` hacia la API. La base de datos vive en un volumen de Docker, así que los datos se conservan entre reinicios.
+Abre **http://localhost:4180** (si ese puerto está ocupado: `WEB_PORT=9000 docker compose up --build`). Es el build de producción: nginx sirve el frontend y hace de proxy de `/api` hacia la API. La base de datos vive en un volumen de Docker, así que los datos se conservan entre reinicios.
 
 | Comando | Efecto |
 |---------|--------|
@@ -129,5 +129,6 @@ Más en [arquitectura](ai-workspace/architecture/01-structure.md) y en el [regis
 | Error de `better-sqlite3` al arrancar (*bindings*) | Módulo nativo compilado para otra versión de Node: `npm rebuild better-sqlite3`. Con npm 11, sus scripts de instalación ya están aprobados en `package.json` (`allowScripts`) |
 | `npm error engine Unsupported engine` al instalar | Tu Node es anterior a la 22 (`node -v`). Actualízalo (hay `.nvmrc` para `nvm use`) o usa la vía Docker |
 | Quiero empezar con la base de datos vacía o recargar los ejemplos | Borra `apps/api/data/` y vuelve a ejecutar `npm run dev` |
+| Con Docker, `localhost:4180` muestra **otra página o un 404 ajeno** | Otro programa usa ese puerto. En Windows puede compartirlo en silencio (uno por IPv4 y otro por IPv6), así que el navegador acaba en el otro. Usa otro puerto: `WEB_PORT=9000 docker compose up --build` (y `WEB_PORT=9000 bash scripts/docker-smoke.sh`) |
 | No cargan los tipos de cambio | La app sigue funcionando en EUR y muestra un aviso con "Reintentar". Si hay tipos de una visita anterior, se usan indicando su fecha |
 | `⚠ Not responding after 20s: api` | La API falló al arrancar (p. ej. `Invalid environment configuration → at LOG_LEVEL`): el motivo está en las líneas `[api]`. En modo watch se reinicia sola al guardar el arreglo |

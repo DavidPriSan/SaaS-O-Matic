@@ -55,6 +55,7 @@ Front (UX inmediata) → Zod en la API (autoridad) → `CHECK`/`UNIQUE` en SQLit
   - Imagen web: build de Vite servido por **nginx**, que hace de proxy de `/api` (mismo contrato que el proxy de Vite, ADR-006): un solo origen y sin CORS.
   - SQLite en un **volumen con nombre**. Capas de dependencias cacheadas (manifiestos antes que código).
 - **Verificación**: job `docker` en la CI que construye, arranca con `--wait` (healthchecks) y ejecuta `scripts/docker-smoke.sh` (web, enlaces directos, proxy, búsqueda, DNI, precio, **persistencia tras reiniciar**). El mismo script sirve en local.
+- **Puerto `4180` (configurable con `WEB_PORT`)**, no `8080`: el 8080 estaba ocupado por un servicio de Windows en el equipo de desarrollo, que lo compartía en silencio por IPv4 mientras Docker escuchaba por IPv6. La prueba de humo comprueba IPv4 e IPv6 por separado para detectarlo.
 - **Complemento**: `engine-strict=true` en `.npmrc`. Con un Node antiguo, `npm install` se detiene al principio con un mensaje claro en lugar de fallar de forma confusa más tarde.
 
 ## ADR-008 · Runtime Node ≥ 22 (desarrollado sobre Node 26 LTS)
