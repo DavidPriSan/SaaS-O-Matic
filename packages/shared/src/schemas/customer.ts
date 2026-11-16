@@ -39,6 +39,8 @@ export const customerSchema = z.object({
 
 export type Customer = z.infer<typeof customerSchema>;
 
+export const customerListResponseSchema = z.object({ items: z.array(customerSchema) });
+
 /** GET /customers query string. */
 export const searchCustomersQuerySchema = z.object({
   q: z.string().trim().max(100).optional(),

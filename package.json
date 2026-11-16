@@ -11,6 +11,7 @@
   },
   "scripts": {
     "dev:api": "npm run dev -w @saas/api",
+    "dev:web": "npm run dev -w @saas/web",
     "seed": "npm run seed -w @saas/api",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
@@ -19,5 +20,9 @@
     "typescript": "^5.6.3",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true,
+    "esbuild@0.28.2": true
   }
 }

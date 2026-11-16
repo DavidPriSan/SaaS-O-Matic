@@ -5,7 +5,7 @@
 - Antes de cada feature, lee la spec correspondiente y `ai-workspace/architecture/01-structure.md`.
 
 ## Stack (no añadir dependencias sin pedir permiso y justificarlo)
-npm workspaces · TypeScript strict · Fastify · Zod · better-sqlite3 · React 18 + Vite · TanStack Query · React Router · Vitest.
+npm workspaces · TypeScript strict · Fastify · Zod · better-sqlite3 · React 19 + Vite · TanStack Query · React Router · Vitest.
 
 ## Arquitectura
 - Dominio puro en `packages/shared` (sin I/O). El backend y el front lo importan; **nunca** dupliques la lógica de precios ni la validación de NIF.

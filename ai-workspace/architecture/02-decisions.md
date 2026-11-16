@@ -32,6 +32,10 @@ Formato corto: contexto → decisión → alternativas descartadas → consecuen
 ## ADR-007 · Validación en 3 capas
 Front (UX inmediata) → Zod en la API (autoridad) → `CHECK`/`UNIQUE` en SQLite (última defensa). La regla vive en `shared`, así que front y API no pueden contradecirse.
 
+## ADR-010 · React 19 en lugar de React 18
+- **Contexto**: la spec original decía React 18. Al empezar la fase 3, la versión estable es la 19.3 y la 18 ya no tiene desarrollo activo.
+- **Decisión**: React 19 (aprobado explícitamente; la spec 05 y `CLAUDE.md` se actualizan en el mismo commit).
+
 ## ADR-008 · Runtime Node ≥ 22 (desarrollado sobre Node 26 LTS)
 - **Contexto**: Fastify 5 actual → `light-my-request@6.8` → `cookie@2`, que exige Node ≥ 22. Además, Node 20 está fuera de soporte desde abril de 2026.
 - **Decisión**: `engines.node >= 22` y `.nvmrc`. Desarrollo y tests sobre Node 26 (LTS activa).

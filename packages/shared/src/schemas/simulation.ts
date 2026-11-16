@@ -54,3 +54,5 @@ export const simulationSchema = z.object({
 });
 
 export type Simulation = z.infer<typeof simulationSchema>;
+
+export const simulationListResponseSchema = z.object({ items: z.array(simulationSchema) });

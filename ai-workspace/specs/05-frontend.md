@@ -1,6 +1,6 @@
 # Spec 05 · Frontend (Dashboard comercial)
 
-Stack: **React 18 + Vite + TypeScript**, **TanStack Query** (caché y estados de carga/error de servidor), **React Router**, **CSS Modules** con variables CSS (sin librería de UI: menos dependencias, control total sobre el responsive). UI en español.
+Stack: **React 19 + Vite + TypeScript** (era React 18; ver ADR-010), **TanStack Query** (caché y estados de carga/error de servidor), **React Router**, **CSS Modules** con variables CSS (sin librería de UI: menos dependencias, control total sobre el responsive). UI en español.
 
 ## 1. Rutas y vistas
 

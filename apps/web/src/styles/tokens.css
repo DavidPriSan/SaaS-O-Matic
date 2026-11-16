@@ -1,0 +1,57 @@
+:root {
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f0f2f5;
+  --color-border: #dfe3e8;
+  --color-text: #1b1f24;
+  --color-text-muted: #5b6573;
+  --color-primary: #3b5bdb;
+  --color-primary-hover: #2f4ac0;
+  --color-primary-contrast: #ffffff;
+  --color-primary-soft: #e7ecff;
+  --color-success: #2b8a3e;
+  --color-success-soft: #e6f4ea;
+  --color-danger: #c92a2a;
+  --color-danger-soft: #fdecec;
+  --color-warning-soft: #fff4db;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 8%);
+  --shadow-card-hover: 0 4px 12px rgb(16 24 40 / 10%);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, monospace;
+  --content-width: 1120px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #101317;
+    --color-surface: #181c22;
+    --color-surface-muted: #20252d;
+    --color-border: #2e3540;
+    --color-text: #e8ebef;
+    --color-text-muted: #9aa4b2;
+    --color-primary: #7d97ff;
+    --color-primary-hover: #97acff;
+    --color-primary-contrast: #0d1020;
+    --color-primary-soft: #232c4d;
+    --color-success: #69db7c;
+    --color-success-soft: #1d3324;
+    --color-danger: #ff8787;
+    --color-danger-soft: #3b1f22;
+    --color-warning-soft: #3a3020;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow-card-hover: 0 4px 16px rgb(0 0 0 / 50%);
+  }
+}
