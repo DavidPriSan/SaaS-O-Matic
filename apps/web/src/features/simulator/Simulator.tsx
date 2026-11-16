@@ -4,6 +4,8 @@ import { describeError } from '../../api/errors';
 import { Button } from '../../components/Button';
 import { RangeField } from '../../components/RangeField';
 import { formatNumber } from '../../lib/format';
+import { useCurrency } from '../currency/CurrencyContext';
+import { BASE_DISPLAY, formatMoney, formatRate } from '../currency/formatMoney';
 import { useMoneyFormatter } from '../currency/useMoneyFormatter';
 import { serverAgreesWithClient, useCreateSimulation, type SimulatorInputs } from './hooks';
 import { QuoteBreakdown } from './QuoteBreakdown';
@@ -19,6 +21,7 @@ type SaveStatus = { kind: 'idle' } | { kind: 'saved'; agrees: boolean };
 
 export function Simulator({ customer, inputs, onInputChange }: SimulatorProps) {
   const money = useMoneyFormatter();
+  const { display } = useCurrency();
   const plan = PLANS[customer.plan];
   const save = useCreateSimulation(customer.id);
   const [status, setStatus] = useState<SaveStatus>({ kind: 'idle' });
@@ -56,6 +59,11 @@ export function Simulator({ customer, inputs, onInputChange }: SimulatorProps) {
           <span className={styles.perUser}>
             ≈ {money(Math.round(quote.baseCents / inputs.activeUsers))} / usuario (sin IVA ni extras)
           </span>
+          {display.currency !== BASE_DISPLAY.currency && (
+            <span className={styles.perUser} data-testid="eur-equivalent">
+              Se factura en EUR: {formatMoney(quote.totalCents)} · {formatRate(display)}
+            </span>
+          )}
         </p>
       </header>
 

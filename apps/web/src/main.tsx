@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { createQueryClient } from './api/queryClient';
 import { routes } from './app/routes';
+import { CurrencyProvider } from './features/currency/CurrencyContext';
 import './styles/global.css';
 
 const container = document.getElementById('root');
@@ -15,7 +16,9 @@ const router = createBrowserRouter(routes);
 createRoot(container).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <CurrencyProvider>
+        <RouterProvider router={router} />
+      </CurrencyProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

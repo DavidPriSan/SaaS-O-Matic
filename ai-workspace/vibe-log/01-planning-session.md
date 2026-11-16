@@ -25,7 +25,7 @@
 - [x] Recalcular los 9 ejemplos de spec 01 §5 con un script independiente de la futura implementación: los 9 cuadran (IVA de los ejemplos 7 y 8: 3677.1 → 3677 y 8076.9 → 8077).
 - [x] Verificar los 15 vectores de NIF/CIF/NIE de spec 02 §5 con el mismo script: todos cuadran. **Corrección**: la IA había redactado una fila ambigua (`ab-12`, con un resultado contradictorio) y la sustituí por dos casos claros (válido / demasiado corto).
 - [x] Contrastar 2–3 CIF reales conocidos: hecho en la fase 1 (ver vibe-log 02).
-- [ ] Confirmar que open.er-api.com admite CORS desde el navegador; si no, añadir un proxy en la API.
+- [x] Confirmar que open.er-api.com admite CORS desde el navegador: `access-control-allow-origin: *` (verificado en la fase 5, vibe-log 07).
 
 ## Resultado
 Specs 01–05, arquitectura (estructura y ADRs), roadmap y `CLAUDE.md`. **Siguiente paso**: fase 1, `packages/shared` con TDD.

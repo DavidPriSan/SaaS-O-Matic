@@ -10,6 +10,7 @@ expect.extend(matchers);
 
 afterEach(() => {
   cleanup();
+  window.localStorage.clear();
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });

@@ -26,6 +26,14 @@ Cabecera global: logo y **selector de divisa**, presente en todas las vistas.
 | Error | Banner no bloqueante "No se pudieron cargar los tipos de cambio · Reintentar". Se fuerza EUR. La app sigue siendo usable |
 | OK | Pie con "Tipos actualizados: {fecha}" (`time_last_update_unix`) |
 
+**Ampliaciones y decisiones de la fase 5:**
+- CORS verificado (`access-control-allow-origin: *`): llamada directa desde el navegador, sin proxy en la API.
+- **Caché obsoleta con API caída**: si hay tipos guardados, se siguen usando con un aviso discreto ("no se pudieron actualizar") en lugar del banner de error. Solo sin caché se fuerza EUR.
+- **Nunca se etiqueta un importe en EUR con otra divisa**: si la divisa guardada no tiene tipo disponible, se muestra EUR y el selector refleja EUR.
+- En el simulador, con divisa distinta de EUR, se muestra el importe que se factura en EUR y el tipo aplicado.
+- Atribución "Rates By Exchange Rate API" en el pie (exigida por las condiciones del endpoint gratuito).
+- La caché de `localStorage` se valida con Zod al leerla, y solo guarda las 6 divisas ofrecidas.
+
 ## 3. Simulador (detalle de cliente)
 - Controles: **slider de usuarios** (1–500) sincronizado con un input numérico (hasta 100.000), y sliders o inputs para GB y llamadas API.
 - Cálculo **en el cliente** con `computeQuote` de `shared` en cada cambio: sin red y sin lag. Plan y país salen del cliente.

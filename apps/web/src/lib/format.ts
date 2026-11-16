@@ -5,9 +5,12 @@ const dateTimeFormatter = new Intl.DateTimeFormat(LOCALE, { dateStyle: 'medium',
 // es-ES does not group 4-digit numbers by default ("1000" vs "10.000"); force consistency.
 const numberFormatter = new Intl.NumberFormat(LOCALE, { useGrouping: 'always' });
 
-export const formatDate = (iso: string): string => dateFormatter.format(new Date(iso));
+/** Accepts an ISO string or epoch milliseconds. */
+type DateInput = string | number;
 
-export const formatDateTime = (iso: string): string => dateTimeFormatter.format(new Date(iso));
+export const formatDate = (value: DateInput): string => dateFormatter.format(new Date(value));
+
+export const formatDateTime = (value: DateInput): string => dateTimeFormatter.format(new Date(value));
 
 export const formatNumber = (value: number): string => numberFormatter.format(value);
 

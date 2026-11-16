@@ -4,7 +4,9 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { vi } from 'vitest';
+import { EXCHANGE_RATES_URL } from '../api/exchangeRates';
 import { routes } from '../app/routes';
+import { CurrencyProvider } from '../features/currency/CurrencyContext';
 
 export function renderRoute(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -12,7 +14,9 @@ export function renderRoute(path: string) {
   const user = userEvent.setup();
   const view = render(
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <CurrencyProvider>
+        <RouterProvider router={router} />
+      </CurrencyProvider>
     </QueryClientProvider>,
   );
   return { router, user, ...view };
@@ -29,22 +33,50 @@ export interface RecordedRequest {
   body: unknown;
 }
 
-/** Replaces global fetch; the handler decides each response. Returns the recorded requests. */
-export function mockFetch(handler: (request: RecordedRequest) => MockResponse): RecordedRequest[] {
+/** Shape of a real open.er-api.com response (trimmed). Round rates keep expected values readable. */
+export const ratesResponse = (rates: Record<string, number> = { EUR: 1, USD: 1.1, GBP: 0.85, JPY: 176 }) => ({
+  result: 'success',
+  base_code: 'EUR',
+  time_last_update_unix: 1794787351,
+  rates,
+});
+
+/** 'pending' never resolves (loading state). A function is evaluated on every request (retry scenarios). */
+type ExchangeMock = MockResponse | 'pending' | (() => MockResponse);
+
+interface MockFetchOptions {
+  exchangeRates?: ExchangeMock;
+}
+
+const jsonResponse = ({ status = 200, body }: MockResponse) =>
+  Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } }));
+
+function respondExchange(mock: ExchangeMock): Promise<Response> {
+  if (mock === 'pending') return new Promise<Response>(() => undefined);
+  return jsonResponse(typeof mock === 'function' ? mock() : mock);
+}
+
+/**
+ * Replaces global fetch. App API requests go to `handler` and are recorded (returned array);
+ * the exchange-rate provider is answered separately so request counts only reflect our API.
+ */
+export function mockFetch(
+  handler: (request: RecordedRequest) => MockResponse,
+  { exchangeRates = { body: ratesResponse() } }: MockFetchOptions = {},
+): RecordedRequest[] {
   const requests: RecordedRequest[] = [];
   vi.stubGlobal(
     'fetch',
     vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input instanceof Request ? input.url : input.toString();
+      if (url === EXCHANGE_RATES_URL) return respondExchange(exchangeRates);
       const request: RecordedRequest = {
-        url: input instanceof Request ? input.url : input.toString(),
+        url,
         method: init?.method ?? 'GET',
         body: typeof init?.body === 'string' ? JSON.parse(init.body) : undefined,
       };
       requests.push(request);
-      const { status = 200, body } = handler(request);
-      return Promise.resolve(
-        new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } }),
-      );
+      return jsonResponse(handler(request));
     }),
   );
   return requests;
