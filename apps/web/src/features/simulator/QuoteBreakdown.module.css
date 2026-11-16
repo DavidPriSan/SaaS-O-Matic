@@ -48,23 +48,6 @@
   font-weight: 700;
 }
 
-/* Long amounts (large usage in MXN/JPY) on a narrow phone: amounts are unbreakable (Intl joins number and
-   currency with a non-breaking space), so the labels give way instead: smaller type and hyphenation. */
-@media (max-width: 400px) {
-  .table {
-    font-size: 0.9rem;
-  }
-
-  .table th {
-    hyphens: auto;
-  }
-
-  .total th,
-  .total td {
-    font-size: 1rem;
-  }
-}
-
 /* Group headers ("Coste por usuarios", "Extras por consumo"): their lines are indented below them. */
 .group th,
 .group td {
@@ -76,12 +59,6 @@
   padding-left: var(--space-3);
 }
 
-@media (max-width: 400px) {
-  .group ~ tr th {
-    padding-left: 0;
-  }
-}
-
 .assumption {
   padding: 1px var(--space-2);
   border-radius: 999px;
@@ -89,4 +66,58 @@
   color: var(--color-text);
   font-weight: 600;
   box-decoration-break: clone;
+}
+
+/*
+ * Narrow phones: amounts are unbreakable (Intl joins number and currency with a non-breaking space) and their
+ * width depends on the installed fonts, so no fixed sizing is safe. Each row becomes a wrapping flex line:
+ * label and amount share it when they fit; otherwise the amount drops below, right-aligned.
+ */
+@media (max-width: 400px) {
+  .table,
+  .table tbody,
+  .table tfoot {
+    display: block;
+  }
+
+  .table tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table th,
+  .table td {
+    border-bottom: none;
+  }
+
+  .table th {
+    flex: 1 1 8rem;
+    min-width: 0;
+    hyphens: auto;
+  }
+
+  .table td {
+    margin-left: auto;
+    padding-left: 0;
+  }
+
+  .group ~ tr th {
+    padding-left: 0;
+  }
+
+  .table tfoot tr {
+    border-bottom: none;
+  }
+
+  .total {
+    border-top: 2px solid var(--color-text);
+  }
+
+  .total th,
+  .total td {
+    border-top: none;
+  }
 }
