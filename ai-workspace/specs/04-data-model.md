@@ -59,6 +59,22 @@ CREATE TABLE simulations (
 CREATE INDEX idx_simulations_customer ON simulations (customer_id, created_at DESC);
 ```
 
+### Migración `002_simulations_checks.sql` (tras la revisión externa)
+La `001` dejaba sin restringir en `simulations` el plan, el país y los máximos de entrada, así que la "validación en 3 capas" no era cierta del todo para esa tabla. La `002` reconstruye la tabla (SQLite no permite añadir `CHECK` a una tabla existente) conservando filas, ids, contador `AUTOINCREMENT` e índice:
+
+| Columna | `CHECK` añadido |
+|---------|-----------------|
+| `active_users` / `storage_gb` / `api_calls` | `BETWEEN` los límites de `QUOTE_LIMITS` (1–100.000 · 0–1.000.000 · 0–10.000.000.000) |
+| `plan` | `IN ('basic','pro','enterprise')` |
+| `country_code` | `IN` los 10 países del catálogo |
+| importes y excedentes | `>= 0` |
+| `subtotal_cents` | `= base_cents + storage_overage_cents + api_overage_cents` |
+| `tax_rate_bp` | `BETWEEN 0 AND 10000` |
+
+- Se edita con una migración nueva, **nunca la `001`**: ya está aplicada en bases existentes (por ejemplo, el volumen de Docker).
+- Un test inserta una fila por cada plan y país del catálogo de `shared`: si el catálogo cambia sin migración, falla.
+- **`customers.country_code` sigue con `length = 2`**: reconstruir `customers` con `foreign_keys = ON` borraría en cascada sus simulaciones, y ese pragma no se puede cambiar dentro de la transacción de cada migración. Lo valida Zod; queda como mejora conocida (requeriría ejecutar esa migración fuera de transacción).
+
 ## Decisiones
 - **Snapshot en `simulations`** (plan, país, IVA, desglose, versión): el historial es inmutable aunque cambien el plan del cliente o la tarifa (A8).
 - **Columnas de importe desnormalizadas** junto al JSON del desglose: permiten consultar y ordenar por total sin parsear JSON. El `CHECK` garantiza la coherencia.
