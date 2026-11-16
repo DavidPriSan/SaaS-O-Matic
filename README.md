@@ -36,7 +36,7 @@ Abre **http://localhost:5173**. Eso es todo.
 
 | Comando | Qué hace |
 |---------|----------|
-| `npm run dev` | Seed (solo si la BD está vacía) + API y web juntos, con salida prefijada `[api]` / `[web]` |
+| `npm run dev` | Seed (solo si la BD está vacía) + API y web juntos, con salida prefijada `[api]` / `[web]`. Avisa cuando la app está lista (o qué servicio no responde); si uno cae, para el otro |
 | `npm run dev:api` / `npm run dev:web` | Solo uno de los dos |
 | `npm run seed` | Carga los datos de ejemplo (no hace nada si ya hay clientes) |
 | `npm test` | Todos los tests (shared, API y web) |
@@ -108,9 +108,9 @@ Más en [arquitectura](ai-workspace/architecture/01-structure.md) y en el [regis
 
 | Problema | Solución |
 |----------|----------|
-| `Port(s) already in use: 3000 …` | Otro proceso usa el puerto. Puede ser una ejecución anterior que se cerró a la fuerza (matando el proceso en lugar de usar `Ctrl+C`), que deja vivos a los hijos. Localízalo y ciérralo: en Windows con `netstat -ano \| findstr :3000` y `taskkill /PID <pid> /F`; en macOS o Linux con `lsof -i :3000` y `kill <pid>`. Después repite `npm run dev` |
+| `Port(s) already in use: 3000 …` | Otro proceso (ajeno a este proyecto) usa el puerto. Localízalo y ciérralo: en Windows con `netstat -ano \| findstr :3000` y `taskkill /PID <pid> /F`; en macOS o Linux con `lsof -i :3000` y `kill <pid>`. Después repite `npm run dev` |
 | Error de `better-sqlite3` al arrancar (*bindings*) | Módulo nativo compilado para otra versión de Node: `npm rebuild better-sqlite3`. Con npm 11, sus scripts de instalación ya están aprobados en `package.json` (`allowScripts`) |
 | `npm warn EBADENGINE` o errores raros de sintaxis | Comprueba `node -v` ≥ 22 (hay `.nvmrc` para `nvm use`) |
 | Quiero empezar con la base de datos vacía o recargar los ejemplos | Borra `apps/api/data/` y vuelve a ejecutar `npm run dev` |
 | No cargan los tipos de cambio | La app sigue funcionando en EUR y muestra un aviso con "Reintentar". Si hay tipos de una visita anterior, se usan indicando su fecha |
-| Cambié el código de la API y "no arranca" | `tsx watch` no termina si la API falla al arrancar: el error aparece en las líneas `[api]` y se recarga al guardar el arreglo |
+| `⚠ Not responding after 20s: api` | La API falló al arrancar (p. ej. `Invalid environment configuration → at LOG_LEVEL`): el motivo está en las líneas `[api]`. En modo watch se reinicia sola al guardar el arreglo |

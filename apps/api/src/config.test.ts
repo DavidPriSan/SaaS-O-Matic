@@ -21,7 +21,7 @@ describe('loadConfig', () => {
     ['PORT', '70000'],
     ['CORS_ORIGIN', 'not-a-url'],
     ['LOG_LEVEL', 'verbose'],
-  ])('fails fast on an invalid %s=%s instead of booting misconfigured', (key, value) => {
-    expect(() => loadConfig({ [key]: value })).toThrow();
+  ])('fails fast on an invalid %s=%s with a message naming the variable', (key, value) => {
+    expect(() => loadConfig({ [key]: value })).toThrow(new RegExp(`Invalid environment configuration[\\s\\S]*${key}`));
   });
 });

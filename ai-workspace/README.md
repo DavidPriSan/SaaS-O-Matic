@@ -26,7 +26,7 @@ Las reglas de `CLAUDE.md` no se quedaron en el papel: **ESLint las hace ejecutab
 | [05 · Calidad y CI](vibe-log/05-quality-and-ci.md) | ESLint, Prettier, cobertura, GitHub Actions | 4 problemas reales que el typecheck no veía; la ruta del 500 sin test; override de supply chain acotado |
 | [06 · Simulador](vibe-log/06-phase4-simulator.md) | Slider en tiempo real, historial | Formato de miles sin aplicar a importes; diagnóstico por eliminación de un fallo que solo ocurría con cobertura en paralelo |
 | [07 · Divisas](vibe-log/07-phase5-currency.md) | API externa, caché, estados | **Mutation testing manual**: un test que faltaba habría permitido mostrar euros con etiqueta de dólares; feedback de usuario sobre la zona horaria |
-| [08 · Cierre](vibe-log/08-phase6-closing.md) | README, `npm run dev`, auditoría | **Auditoría con un agente independiente** (6 bugs reales y 1 falso positivo, todos verificados); prueba desde un clon limpio |
+| [08 · Cierre](vibe-log/08-phase6-closing.md) | README, `npm run dev`, auditoría | **Auditoría con un agente independiente** (6 bugs reales y 1 falso positivo, todos verificados); prueba desde un clon limpio; **diagnóstico de procesos huérfanos** hasta la causa raíz (job objects de Windows) tras descartar una solución "de libro" que no funcionaba |
 
 ## Retrospectiva: cómo se dirigió a la IA
 

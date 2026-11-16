@@ -27,7 +27,7 @@ Flujo seguido: **18 tests nuevos en rojo → correcciones → 212 en verde**.
 - En Windows cierra el árbol de procesos con `taskkill /T` (`child.kill()` no mata a `tsx` ni a `vite`).
 - **Prueba que no salió como esperaba:** para simular un conflicto de puertos ocupé el 3000 con otro servidor… y la API **arrancó igualmente**. En Windows, un proceso en la dirección comodín y otro en `127.0.0.1`/`::1` pueden compartir puerto en silencio. → Se añadió una **comprobación previa de puertos** con mensaje claro.
 - **Caída de un servicio**: matar Vite en marcha → el supervisor para la API y sale con código 1, sin huérfanos.
-- **Límite conocido y documentado:** `tsx watch` no termina si la API falla al arrancar (espera cambios), y un cierre *forzoso* del supervisor deja hijos vivos (le pasa a cualquier orquestador). Con `Ctrl+C` o cerrando la terminal se paran todos. Se detectó en la prueba desde cero, y la comprobación de puertos lo hace evidente en la siguiente ejecución.
+- Quedaron dos limitaciones documentadas: `tsx watch` no termina si la API falla al arrancar, y un cierre *forzoso* del supervisor dejaba hijos vivos (detectado en la prueba desde cero). **Se resolvieron después; ver §5.**
 
 ## 3. README pensado para el evaluador
 Tres comandos, un **recorrido guiado de 5 minutos** con resultados esperados (169,40 €, DNI inválido frente a válido, 409 con otro formato…), tabla de scripts, variables de entorno, resumen de la API, reglas de negocio con sus supuestos y solución de problemas reales encontrados durante el desarrollo (scripts de instalación de npm 11, puertos, binario nativo). Se sustituyó una sugerencia de `npx kill-port` (ejecutar un paquete de terceros) por comandos nativos del sistema.
@@ -37,6 +37,38 @@ Clon limpio **desde GitHub** en una carpeta nueva, siguiendo el README al pie de
 - `npm install`: 19 s, 0 vulnerabilidades, **ningún aviso de scripts bloqueados** (el `allowScripts` versionado funciona).
 - `npm run dev`: crea la BD, carga el seed y levanta los dos servidores.
 - Recorrido del README contra ese clon: "nebula" → Nébula Analytics, 15 usuarios → 16940 céntimos, DNI `12345678A` → `INVALID_CONTROL`, NIF repetido con otro formato → 409.
+
+## 5. "¿Hay alguna forma de resolver las dos limitaciones?" (pregunta mía)
+
+### Limitación 1: la API se queda en `tsx watch` si falla al arrancar
+Que no termine es lo deseable en desarrollo (corriges, guardas y se reinicia). El problema real era **la falta de señal**.
+- **Comprobación de disponibilidad** en el supervisor (`/health` y portada de Vite): `✓ SaaS-O-Matic is ready → http://localhost:5173`, o `⚠ Not responding after 20s: api. Check the [api] messages above`.
+- Al provocar el fallo (`LOG_LEVEL=verbose`) apareció un segundo problema: el error era un **`ZodError` en crudo**. `loadConfig` usa ahora `z.prettifyError` → `Invalid environment configuration: → at LOG_LEVEL` (test actualizado para exigir el nombre de la variable).
+- De paso se vio que `npm run dev` ya fallaba pronto con un env inválido, porque el seed carga la configuración antes.
+
+### Limitación 2: procesos huérfanos tras un cierre forzoso. Diagnóstico por iteraciones
+| Intento | Resultado de la prueba | Aprendizaje |
+|---------|------------------------|-------------|
+| **Guardián por servicio** conectado por IPC: si el supervisor muere, `disconnect` → mata el árbol | ❌ Seguían vivos `tsx` y `vite` | Sus padres (npm y `cmd.exe`) ya no existían |
+| Hipótesis: npm y cmd mueren por `EPIPE` al romperse la tubería compartida → pipes propias en el guardián | ❌ Igual | La hipótesis no era la causa (o no toda) |
+| **Instrumentar el guardián** (log a fichero) | El guardián de web entraba en `stop()` y **moría antes de `taskkill`**; el de api ni siquiera registraba el evento | Algo mataba a los guardianes a la vez que al supervisor |
+| **Experimento mínimo aislado** (padre → `fork` → hijo que escribe cada 200 ms; matar al padre) | El hijo muere **en el mismo milisegundo**, sin `disconnect` ni `exit` | Terminación del SO, no de Node |
+
+**Causa raíz:** en Windows, libuv (Node) mete a los procesos hijos en un *job object* con `KILL_ON_JOB_CLOSE`: si un proceso Node muere, aunque sea a la fuerza, Windows mata a sus hijos **directos**. La cascada funciona a lo largo de una cadena de procesos Node, pero **se corta en `cmd.exe`** (npm ejecuta los scripts con `cmd` en Windows). Cadena real: `supervisor → npm → cmd.exe → tsx/vite`. Esto explica también por qué el guardián no podía funcionar: como hijo directo, Windows lo mataba con el supervisor.
+
+**Solución final (más simple que la primera):** se elimina el guardián y el supervisor lanza `tsx` y `vite` **directamente con Node**, sin npm ni `cmd`. Para no duplicar comandos, lee el script `dev` de cada `package.json` (`tsx watch src/server.ts`, `vite`) y resuelve el binario en `node_modules`: los `package.json` siguen siendo la única fuente de verdad.
+
+**Verificado:**
+| Escenario | Resultado |
+|-----------|-----------|
+| Cierre forzoso **solo del supervisor** (`Stop-Process -Force`, sin árbol) | 0 procesos vivos y puertos libres en 2 s |
+| La API falla al arrancar → aviso → cierre forzoso | Aviso correcto, la web sigue sirviendo y luego 0 huérfanos |
+| Vite cae en marcha (regresión) | El supervisor para la API, 0 huérfanos |
+| Puerto ocupado (regresión) | Mensaje claro, código 1 |
+
+> En POSIX no hay *job objects*: `Ctrl+C` y cerrar la terminal señalizan a todo el grupo de procesos (el caso normal). Un `kill -9` solo al supervisor podría dejar hijos; la comprobación de puertos lo haría evidente. Aceptado para una herramienta de desarrollo.
+
+> Lección: la primera solución "de libro" (guardián con IPC) era razonable y **falsa en esta plataforma**. Sin la prueba con cierre forzoso real, se habría entregado como resuelta. Instrumentar y aislar con un experimento mínimo convirtió tres hipótesis fallidas en una causa raíz concreta.
 
 ## Resultado final
 - `npm run check` → OK. **212 tests** (108 shared + 51 API + 53 web). Cobertura: shared 96 %, API 97 %, web 96 %.

@@ -13,6 +13,11 @@ const envSchema = z.object({
 
 export type AppConfig = z.infer<typeof envSchema>;
 
+/** Fails fast with a readable message (not a raw ZodError dump) naming the offending variable. */
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
-  return envSchema.parse(env);
+  const result = envSchema.safeParse(env);
+  if (!result.success) {
+    throw new Error(`Invalid environment configuration:\n${z.prettifyError(result.error)}`);
+  }
+  return result.data;
 }
